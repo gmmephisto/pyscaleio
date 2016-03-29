@@ -1,0 +1,5 @@
+build/
+dist/
+.venv
+.eggs
+*.egg*
