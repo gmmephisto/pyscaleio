@@ -1,4 +1,4 @@
-.PHONY: env changelog sources clean
+.PHONY: env changelog clean
 
 VENV    ?= .venv
 PIP     ?= $(VENV)/bin/pip
@@ -17,12 +17,8 @@ endif
 
 ifneq ($(wildcard $(PIP)),)
 changelog:
-	$(shell $(PIP) freeze | grep pyscaleio) && $(PYTHON) setup.py install
+	$(PYTHON) setup.py install
 endif
-
-sources: clean
-	@git archive --format=tar --prefix="$(PACKAGE)-$(VERSION)/" \
-		$(shell git rev-parse --verify HEAD) | gzip > "$(PACKAGE)-$(VERSION).tar.gz"
 
 clean:
 	@rm -rf .venv/ build/ dist/ .tox/ *.egg* .eggs/ rpms/ srpms/ *.tar.gz *.rpm
