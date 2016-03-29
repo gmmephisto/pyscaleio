@@ -161,3 +161,55 @@ class ScaleIOSession(object):
     def post(self, path, data):
         return self._send_request(
             method="post", url=urljoin(self.endpoint, path), data=data)
+
+
+class ScaleIOClient(object):
+    """API Client for ScaleIO."""
+
+    _session = None
+    """ScaleIO session instance."""
+
+    @classmethod
+    def from_args(cls, *args, **kwargs):
+        """Initialize from ScaleIOSession args."""
+
+        return cls(session=ScaleIOSession(*args, **kwargs))
+
+    def __init__(self, session):
+        if not isinstance(session, ScaleIOSession):
+            raise psys.Error(
+                "ScaleIOClient must be initalized with ScaleIOSession.")
+        self._session = session
+
+    @property
+    def session(self):
+        return self._session
+
+    def get_version(self):
+        """Returns ScaleIO REST API version."""
+
+        return self._session.get("version")
+
+    def get_all_instances(self):
+        """Returns all exists instances of all types."""
+
+        return self._session.get("instances")
+
+    def get_instances_of(self, resourse, params=None):
+        """Returns list of instances of specified resource."""
+
+        path = "types/{type}/instances".format(type=resourse)
+
+        if params:
+            query = path + "?"
+            for param, value in params.items():
+                query += "{0}={1}".format(param, value)
+
+        return self._session.get(path)
+
+    def get_instance_of(self, resourse, resourse_id):
+        """Returns instance of specified resourse type by id."""
+
+        return self._session.get("instances/{type}::{id}".format(
+            type=resourse, id=resourse_id)
+        )
