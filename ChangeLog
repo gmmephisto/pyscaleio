@@ -1,4 +1,7 @@
 CHANGES
 =======
 
+* Update Makefile
+* Added flake8 linting and tox
+* Added scaleio client and minimal getters
 * Initial commit: sclaleio session
