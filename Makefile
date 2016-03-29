@@ -13,8 +13,7 @@ ifeq ($(wildcard $(PIP)),)
 	virtualenv $(VENV) --python=$(PYVER)
 endif
 	$(PIP) uninstall $(PACKAGE) -q -y ||:
-	$(PIP) install -U -r ./requirements.txt
-	$(PYTHON) setup.py install
+	$(PYTHON) setup.py develop
 
 ifneq ($(wildcard $(PIP)),)
 changelog:
@@ -26,4 +25,4 @@ sources: clean
 		$(shell git rev-parse --verify HEAD) | gzip > "$(PACKAGE)-$(VERSION).tar.gz"
 
 clean:
-	@rm -rf .venv/ build/ dist/ *.egg* .eggs/ rpms/ srpms/ *.tar.gz *.rpm
+	@rm -rf .venv/ build/ dist/ .tox/ *.egg* .eggs/ rpms/ srpms/ *.tar.gz *.rpm
