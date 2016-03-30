@@ -118,7 +118,7 @@ class ScaleIOSession(object):
         except (ValueError, TypeError):
             raise ScaleIOMalformedError()
 
-    def _send_request(self, method, url, data=None, headers=None):
+    def _send_request(self, method, url, params=None, data=None, headers=None):
         """Base method for sending requests."""
 
         headers = headers or {}
@@ -132,6 +132,7 @@ class ScaleIOSession(object):
             response = self.__session.request(
                 method=method,
                 url=url,
+                params=params,
                 data=data,
                 timeout=self.timeout,
                 allow_redirects=False,
@@ -154,13 +155,13 @@ class ScaleIOSession(object):
                 else:
                     return self.__response(response)
 
-    def get(self, path):
-        return self._send_request(
-            method="get", url=urljoin(self.endpoint, path))
+    def get(self, path, params=None):
+        return self._send_request(method="get",
+            url=urljoin(self.endpoint, path), params=params)
 
     def post(self, path, data):
-        return self._send_request(
-            method="post", url=urljoin(self.endpoint, path), data=data)
+        return self._send_request(method="post",
+            url=urljoin(self.endpoint, path), data=data)
 
 
 class ScaleIOClient(object):
@@ -198,14 +199,9 @@ class ScaleIOClient(object):
     def get_instances_of(self, resourse, params=None):
         """Returns list of instances of specified resource."""
 
-        path = "types/{type}/instances".format(type=resourse)
-
-        if params:
-            query = path + "?"
-            for param, value in params.items():
-                query += "{0}={1}".format(param, value)
-
-        return self._session.get(path)
+        return self._session.get("types/{type}/instances".format(
+            type=resourse), params=params
+        )
 
     def get_instance_of(self, resourse, resourse_id):
         """Returns instance of specified resourse type by id."""
