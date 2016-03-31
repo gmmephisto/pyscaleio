@@ -177,3 +177,28 @@ def test_session_send_request_negative():
     assert exc.error_code == 0
     assert "code=500" in str(exc)
     assert "message=Server error" in str(exc)
+
+
+def test_session_logout():
+
+    call_count = [0]
+
+    @httmock.urlmatch(path=r".*logout")
+    def logout_payload(url, request):
+        call_count[0] += 1
+        return httmock.response(200)
+
+    client = ScaleIOSession("localhost", "admin", "passwd")
+    assert not client.token
+
+    with HTTMock(logout_payload):
+        client.logout()
+    assert call_count[0] == 0
+
+    with HTTMock(login_payload, logout_payload):
+        client.login()
+        assert client.token
+
+        client.logout()
+
+    assert not client.token

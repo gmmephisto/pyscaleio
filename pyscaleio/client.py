@@ -113,6 +113,16 @@ class ScaleIOSession(object):
         self.token = self.__response(response)
         self.__session.auth = (self.user, self.token)
 
+    def logout(self):
+        """Logouts from ScaleIO REST Gateway and invalidates token."""
+
+        if self.__session and self.token:
+            self.__session.get(
+                url=urljoin(self.endpoint, "logout"))
+
+        self.token = None
+        self.__session.auth = None
+
     def _send_request(self, method, url, params=None, data=None, headers=None):
         """Base method for sending requests."""
 
