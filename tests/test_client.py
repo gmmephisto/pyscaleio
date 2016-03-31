@@ -190,6 +190,23 @@ def test_session_send_request_negative():
     assert "message=Server error" in str(exc)
 
 
+def test_session_send_request_malformed():
+
+    @httmock.urlmatch(path=r"/api/test/instance")
+    def request_payload(url, request):
+        return httmock.response(200,
+            "<?xml version='1.0' encoding='UTF-8'?>",
+            request=request
+        )
+
+    client = ScaleIOSession("localhost", "admin", "passwd")
+    client.token = "some_token"
+
+    with HTTMock(request_payload):
+        with pytest.raises(pyscaleio.client.ScaleIOMalformedError):
+            client.get("test/instance")
+
+
 def test_session_logout():
 
     client = ScaleIOSession("localhost", "admin", "passwd")
