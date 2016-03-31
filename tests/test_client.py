@@ -12,11 +12,18 @@ import pyscaleio.client
 
 
 @httmock.urlmatch(path=r".*login")
+@httmock.remember_called
 def login_payload(url, request):
     return httmock.response(200,
         json.dumps("some_random_token_string"),
         request=request
     )
+
+
+@httmock.urlmatch(path=r".*logout")
+@httmock.remember_called
+def logout_payload(url, request):
+    return httmock.response(200)
 
 
 def test_session_initialize():
@@ -123,6 +130,7 @@ def test_session_send_request_retries(effect, result, retries):
     mock_handler = mock.Mock(side_effect=effect)
 
     @httmock.all_requests
+    @httmock.remember_called
     def request_payload(url, request):
         code, payload = mock_handler()
         return httmock.response(code, json.dumps(payload),
@@ -138,6 +146,9 @@ def test_session_send_request_retries(effect, result, retries):
     assert real_result == result
     assert mock_handler.call_count == retries
     assert client.token == "some_random_token_string"
+
+    assert login_payload.call["count"] == retries - 1
+    assert request_payload.call["count"] == retries
 
 
 def test_session_send_request_with_login():
@@ -181,19 +192,12 @@ def test_session_send_request_negative():
 
 def test_session_logout():
 
-    call_count = [0]
-
-    @httmock.urlmatch(path=r".*logout")
-    def logout_payload(url, request):
-        call_count[0] += 1
-        return httmock.response(200)
-
     client = ScaleIOSession("localhost", "admin", "passwd")
     assert not client.token
 
     with HTTMock(logout_payload):
         client.logout()
-    assert call_count[0] == 0
+    assert not logout_payload.call["called"]
 
     with HTTMock(login_payload, logout_payload):
         client.login()
