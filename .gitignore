@@ -1,6 +1,8 @@
 build/
 dist/
 .tox/
+.coverage-report/
 .venv
 .eggs
 *.egg*
+.coverage

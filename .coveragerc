@@ -1,0 +1,20 @@
+[run]
+branch = True
+
+[report]
+exclude_lines =
+    raise AssertionError
+    raise NotImplementedError
+
+# Ignore code errors
+ignore_errors = True
+
+# Show missing lines
+show_missing = True
+
+# Show only non-complete covered files
+skip_covered = True
+
+[html]
+directory = .coverage-report
+title = pyscaleio - coverage report

@@ -66,6 +66,30 @@ class ScaleIOSession(object):
     def endpoint(self):
         return self.__endpoint.format(host=self.host)
 
+    def __expired(self):
+        """Handle session expiring."""
+
+        self.token = None
+        self.__session.auth = None
+
+        self.login()
+
+    def __error(self, exc):
+        """Handle request error."""
+
+        error = self.__response(exc.response)
+        raise ScaleIOError(error["httpStatusCode"],
+                           error["message"],
+                           error["errorCode"])
+
+    def __response(self, response):
+        """Handle response object."""
+
+        try:
+            return json.loads(psys.u(response.text))
+        except (ValueError, TypeError):
+            raise ScaleIOMalformedError()
+
     def login(self):
         """Logins to ScaleIO REST Gateway."""
 
@@ -86,37 +110,8 @@ class ScaleIOSession(object):
             else:
                 raise
 
-        self.token = json.loads(response.text)
+        self.token = self.__response(response)
         self.__session.auth = (self.user, self.token)
-
-    def __expired(self):
-        """Handle session expiring."""
-
-        self.token = None
-        self.__session.auth = None
-
-        self.login()
-
-    def __error(self, exc):
-        """Handle request error."""
-
-        error = None
-        try:
-            error = json.loads(exc.response.text)
-        except (ValueError, TypeError):
-            raise exc
-        else:
-            raise ScaleIOError(error["httpStatusCode"],
-                               error["message"],
-                               error["errorCode"])
-
-    def __response(self, response):
-        """Handle response object."""
-
-        try:
-            return json.loads(psys.u(response.text))
-        except (ValueError, TypeError):
-            raise ScaleIOMalformedError()
 
     def _send_request(self, method, url, params=None, data=None, headers=None):
         """Base method for sending requests."""

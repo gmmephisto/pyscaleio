@@ -21,4 +21,5 @@ changelog:
 endif
 
 clean:
-	@rm -rf .venv/ build/ dist/ .tox/ *.egg* .eggs/ rpms/ srpms/ *.tar.gz *.rpm
+	@rm -rf .coverage .coverage-report .venv/ build/ dist/ \
+			.tox/ *.egg* .eggs/ rpms/ srpms/ *.tar.gz *.rpm
