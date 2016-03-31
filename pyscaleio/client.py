@@ -4,7 +4,7 @@ import json
 import psys
 import requests
 
-from urlparse import urljoin
+from six.moves.urllib.parse import urljoin
 
 requests.packages.urllib3.disable_warnings()
 """Disable certificate warnings."""
