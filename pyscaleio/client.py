@@ -6,30 +6,14 @@ import requests
 
 from six.moves.urllib.parse import urljoin
 
+from pyscaleio import exceptions
+
+
 requests.packages.urllib3.disable_warnings()
 """Disable certificate warnings."""
 
 __api_version__ = 2.0
 """ScaleIO API Version."""
-
-
-class ScaleIOError(psys.Error):
-    def __init__(self, code, message, error_code=None):
-        super(ScaleIOError, self).__init__(
-            "ScaleIOError: code={0}, message={1}", code, message
-        )
-        self.status_code = code
-        self.error_code = error_code or 0
-
-
-class ScaleIOAuthError(ScaleIOError):
-    def __init__(self):
-        super(ScaleIOAuthError, self).__init__(401, "Unauthorized")
-
-
-class ScaleIOMalformedError(ScaleIOError):
-    def __init__(self):
-        super(ScaleIOMalformedError, self).__init__(500, "Malformed response")
 
 
 class ScaleIOSession(object):
@@ -78,9 +62,9 @@ class ScaleIOSession(object):
         """Handle request error."""
 
         error = self.__response(exc.response)
-        raise ScaleIOError(error["httpStatusCode"],
-                           error["message"],
-                           error["errorCode"])
+        raise exceptions.ScaleIOError(error["httpStatusCode"],
+                                      error["message"],
+                                      error["errorCode"])
 
     def __response(self, response):
         """Handle response object."""
@@ -88,7 +72,7 @@ class ScaleIOSession(object):
         try:
             return json.loads(psys.u(response.text))
         except (ValueError, TypeError):
-            raise ScaleIOMalformedError()
+            raise exceptions.ScaleIOMalformedError()
 
     def login(self):
         """Logins to ScaleIO REST Gateway."""
@@ -106,7 +90,7 @@ class ScaleIOSession(object):
             response.raise_for_status()
         except requests.HTTPError as e:
             if e.response.status_code == 401:
-                raise ScaleIOAuthError()
+                raise exceptions.ScaleIOAuthError()
             else:
                 raise
 

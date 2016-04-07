@@ -7,8 +7,8 @@ import pytest
 
 from httmock import HTTMock
 
+from pyscaleio import exceptions
 from pyscaleio.client import ScaleIOSession
-import pyscaleio.client
 
 
 @httmock.urlmatch(path=r".*login")
@@ -59,7 +59,7 @@ def test_session_login_positive():
 
 
 @pytest.mark.parametrize(("code", "message", "exc"), [
-    (401, "Unauthorized", pyscaleio.client.ScaleIOAuthError),
+    (401, "Unauthorized", exceptions.ScaleIOAuthError),
     (500, "Server error", requests.HTTPError)
 ])
 def test_session_login_negative(code, message, exc):
@@ -81,7 +81,7 @@ def test_session_login_negative(code, message, exc):
         with pytest.raises(exc) as e:
             client.login()
 
-    if isinstance(e, pyscaleio.client.ScaleIOError):
+    if isinstance(e, exceptions.ScaleIOError):
         assert e.status_code == code
         assert e.error_code == 0
         assert str(e) == message
@@ -180,7 +180,7 @@ def test_session_send_request_negative():
     assert not client.token
 
     with HTTMock(login_payload, api_exception):
-        with pytest.raises(pyscaleio.client.ScaleIOError) as e:
+        with pytest.raises(exceptions.ScaleIOError) as e:
             client.get("test/instance")
 
     exc = e.value
@@ -203,7 +203,7 @@ def test_session_send_request_malformed():
     client.token = "some_token"
 
     with HTTMock(request_payload):
-        with pytest.raises(pyscaleio.client.ScaleIOMalformedError):
+        with pytest.raises(exceptions.ScaleIOMalformedError):
             client.get("test/instance")
 
 
