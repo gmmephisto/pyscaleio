@@ -22,11 +22,12 @@ class ScaleIOSession(object):
     __session = None
     """Session instance."""
 
-    __endpoint = "https://{host}/api/"
+    __endpoint = "{scheme}://{host}/api/"
     """Endpoint template."""
 
-    def __init__(self, host, user, passwd):
+    def __init__(self, host, user, passwd, is_secure=True):
         self.host = host
+        self.scheme = "https" if is_secure else "http"
 
         self.user = user
         self.passwd = passwd
@@ -48,7 +49,8 @@ class ScaleIOSession(object):
 
     @property
     def endpoint(self):
-        return self.__endpoint.format(host=self.host)
+        return self.__endpoint.format(
+            scheme=self.scheme, host=self.host)
 
     def __expired(self):
         """Handle session expiring."""

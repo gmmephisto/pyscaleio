@@ -59,9 +59,13 @@ def instances_of_payload(url, request):
     }]), request=request)
 
 
-def test_session_initialize():
+@pytest.mark.parametrize(("is_secure", "scheme"), [
+    (True, "https"), (False, "http")
+])
+def test_session_initialize(is_secure, scheme):
 
-    client = ScaleIOSession("localhost", "admin", "passwd")
+    client = ScaleIOSession(
+        "localhost", "admin", "passwd", is_secure=is_secure)
     assert client.host == "localhost"
     assert client.user == "admin"
     assert client.passwd == "passwd"
@@ -75,7 +79,7 @@ def test_session_initialize():
     assert headers["Accept"] == "application/json; version=2.0"
     assert headers["content-type"] == "application/json"
 
-    assert client.endpoint == "https://localhost/api/"
+    assert client.endpoint == "{0}://localhost/api/".format(scheme)
 
 
 def test_session_login_positive():
