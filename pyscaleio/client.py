@@ -198,3 +198,25 @@ class ScaleIOClient(object):
         return self._session.get("instances/{type}::{id}".format(
             type=resourse, id=resourse_id)
         )
+
+    def create_instance_of(self, resource, resource_data):
+        """Creates instance of specified resource."""
+
+        return self._session.post("types/{type}/instances".format(
+            type=resource), data=psys.u(json.dumps(resource_data))
+        )
+
+    def perform_action_on(self, resource, resource_id, action, action_data):
+        """Performs action on single instnace of specified resource type."""
+
+        return self._session.post("instances/{type}::{id}/action/{action}".format(
+            type=resource, id=resource_id, action=action),
+            data=psys.u(json.dumps(action_data))
+        )
+
+    def perform_actions_on(self, resource, action, action_data):
+        """Performs action on all instances of specified resource type."""
+
+        return self._session.post("types/{type}/instances/action/{action}".format(
+            type=resource, action=action), data=psys.u(json.dumps(action_data))
+        )

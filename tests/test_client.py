@@ -1,3 +1,4 @@
+import collections
 import json
 import requests
 
@@ -6,9 +7,11 @@ import mock
 import pytest
 
 from httmock import HTTMock
+from psys import Error
 
 from pyscaleio import exceptions
-from pyscaleio.client import ScaleIOSession
+from pyscaleio.client import ScaleIOSession, ScaleIOClient
+import pyscaleio.client
 
 
 @httmock.urlmatch(path=r".*login")
@@ -24,6 +27,28 @@ def login_payload(url, request):
 @httmock.remember_called
 def logout_payload(url, request):
     return httmock.response(200)
+
+
+@httmock.urlmatch(path=r".*/api/version$", method="get")
+def version_payload(url, request):
+    return httmock.response(200, json.dumps(
+        pyscaleio.client.__api_version__
+    ), request=request)
+
+
+@httmock.urlmatch(path=r".*/api/instances$", method="get")
+def all_instances_payload(url, request):
+    return httmock.response(200, {
+        "resourceList": [1, 2],
+    }, request=request)
+
+
+@httmock.urlmatch(path=r".*/api/types/(\w+)/instances", method="get")
+def instances_of_payload(url, request):
+    return httmock.response(200, json.dumps([{
+        "field1": 1,
+        "field2": 2
+    }]), request=request)
 
 
 def test_session_initialize():
@@ -223,3 +248,41 @@ def test_session_logout():
         client.logout()
 
     assert not client.token
+
+
+def test_client_initialize():
+
+    with pytest.raises(Error) as e:
+        ScaleIOClient(object())
+
+    assert "must be initalized with ScaleIOSession" in str(e)
+
+    client = ScaleIOClient(ScaleIOSession(
+        "localhost", "admin", "passwd"
+    ))
+    assert client
+    assert isinstance(client, ScaleIOClient)
+
+    assert client.session
+    assert isinstance(client.session, ScaleIOSession)
+
+    with HTTMock(login_payload, version_payload):
+        result = client.get_version()
+        assert isinstance(result, float)
+        assert result == pyscaleio.client.__api_version__
+
+
+def test_client_getters():
+
+    client = ScaleIOClient.from_args("localhost", "admin", "passwd")
+
+    with HTTMock(login_payload, all_instances_payload):
+        result = client.get_all_instances()
+        assert isinstance(result, collections.MutableMapping)
+        assert "resourceList" in result
+        assert isinstance(result["resourceList"], list)
+
+    with HTTMock(login_payload, instances_of_payload):
+        result = client.get_instances_of("Resource")
+        assert result
+        assert isinstance(result, list)
