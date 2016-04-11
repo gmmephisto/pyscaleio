@@ -18,3 +18,26 @@ class ScaleIOAuthError(ScaleIOError):
 class ScaleIOMalformedError(ScaleIOError):
     def __init__(self):
         super(ScaleIOMalformedError, self).__init__(500, "Malformed response")
+
+
+class ScaleIOInvalidClient(Error):
+    def __init__(self):
+        super(ScaleIOInvalidClient, self).__init__("Invalid ScaleIO client instance.")
+
+
+class ScaleIOClientAlreadyRegistered(Error):
+    def __init__(self, key):
+        super(ScaleIOClientAlreadyRegistered, self).__init__(
+            "ScaleIOClient with key '{0}' already registered.", key)
+
+
+class ScaleIOClientNotRegistered(Error):
+    def __init__(self, key):
+        super(ScaleIOClientNotRegistered, self).__init__(
+            "ScaleIOClient with key '{0}' not registered.", key)
+
+
+class ScaleIOEmptyClientRegistry(Error):
+    def __init__(self):
+        super(ScaleIOEmptyClientRegistry, self).__init__(
+            "Clients for ScaleIO not registered.")

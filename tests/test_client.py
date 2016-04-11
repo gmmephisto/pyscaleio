@@ -11,7 +11,15 @@ from psys import Error
 
 from pyscaleio import exceptions
 from pyscaleio.client import ScaleIOSession, ScaleIOClient
+from pyscaleio.client import ScaleIOClientsManager
 import pyscaleio.client
+
+
+@pytest.fixture(scope="function")
+def manager(request):
+    m = ScaleIOClientsManager()
+    request.addfinalizer(m.deregister)
+    return m
 
 
 @httmock.urlmatch(path=r".*login")
@@ -286,3 +294,44 @@ def test_client_getters():
         result = client.get_instances_of("Resource")
         assert result
         assert isinstance(result, list)
+
+
+def test_client_manager_register(manager):
+
+    assert manager is ScaleIOClientsManager()
+
+    client = ScaleIOClient.from_args("localhost", "admin", "passwd")
+    manager.register(client)
+
+    assert manager.clients
+    assert len(manager.clients) == 1
+    assert client.session.host in manager.clients
+
+    assert manager.default is client
+
+    registered_client = manager.get_client()
+    assert registered_client is client
+
+    manager.deregister("localhost")
+    assert not manager.clients
+
+
+def test_client_manager_register_negative(manager):
+
+    assert manager is ScaleIOClientsManager()
+
+    client = ScaleIOClient.from_args("localhost", "admin", "passwd")
+
+    with pytest.raises(exceptions.ScaleIOEmptyClientRegistry):
+        manager.get_client()
+
+    with pytest.raises(exceptions.ScaleIOClientNotRegistered):
+        manager.get_client("localhost")
+
+    with pytest.raises(exceptions.ScaleIOInvalidClient):
+        manager.register(object())
+
+    client = ScaleIOClient.from_args("localhost", "admin", "passwd")
+    manager.register(client)
+    with pytest.raises(exceptions.ScaleIOClientAlreadyRegistered):
+        manager.register(client)
