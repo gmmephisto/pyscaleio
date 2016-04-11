@@ -263,7 +263,7 @@ def test_client_initialize():
     with pytest.raises(Error) as e:
         ScaleIOClient(object())
 
-    assert "must be initalized with ScaleIOSession" in str(e)
+    assert "must be initialized with ScaleIOSession" in str(e)
 
     client = ScaleIOClient(ScaleIOSession(
         "localhost", "admin", "passwd"

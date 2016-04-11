@@ -98,7 +98,7 @@ class ScaleIOSession(object):
         self.__session.auth = (self.user, self.token)
 
     def logout(self):
-        """Logouts from ScaleIO REST Gateway and invalidates token."""
+        """Logout from ScaleIO REST Gateway and invalidates token."""
 
         if self.__session and self.token:
             self.__session.get(
@@ -161,14 +161,14 @@ class ScaleIOClient(object):
 
     @classmethod
     def from_args(cls, *args, **kwargs):
-        """Initialize from ScaleIOSession args."""
+        """Initialize from ScaleIOSession arguments."""
 
         return cls(session=ScaleIOSession(*args, **kwargs))
 
     def __init__(self, session):
         if not isinstance(session, ScaleIOSession):
             raise psys.Error(
-                "ScaleIOClient must be initalized with ScaleIOSession.")
+                "ScaleIOClient must be initialized with ScaleIOSession.")
         self._session = session
 
     @property
@@ -193,7 +193,7 @@ class ScaleIOClient(object):
         )
 
     def get_instance_of(self, resourse, resourse_id):
-        """Returns instance of specified resourse type by id."""
+        """Returns instance of specified resource type by id."""
 
         return self._session.get("instances/{type}::{id}".format(
             type=resourse, id=resourse_id)
@@ -207,7 +207,7 @@ class ScaleIOClient(object):
         )
 
     def perform_action_on(self, resource, resource_id, action, action_data):
-        """Performs action on single instnace of specified resource type."""
+        """Performs action on single instance of specified resource type."""
 
         return self._session.post("instances/{type}::{id}/action/{action}".format(
             type=resource, id=resource_id, action=action),
