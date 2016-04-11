@@ -11,7 +11,7 @@ from psys import Error
 
 from pyscaleio import exceptions
 from pyscaleio.client import ScaleIOSession, ScaleIOClient
-from pyscaleio.client import ScaleIOClientsManager
+from pyscaleio.manager import ScaleIOClientsManager
 import pyscaleio.client
 
 
