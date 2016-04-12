@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from collections import Mapping
 
 from inflection import camelize, underscore
-from object_validator import validate
+from object_validator import validate, ValidationError
 from object_validator import DictScheme, List, String, Integer, Bool
 
 from psys import Error
@@ -102,7 +102,7 @@ class BaseResource(Mapping):
         if instance_id:
             instance = self._client.get_instance_of(self._get_name(), instance_id)
 
-        self._instance = validate("instance", instance or {}, self._get_scheme())
+        self._instance = self._validate(instance or {})
 
     def __getitem__(self, key):
         return self._instance[key]
@@ -112,6 +112,27 @@ class BaseResource(Mapping):
 
     def __len__(self):
         return len(self._instance)
+
+    def _validate(self, instance):
+        try:
+            return validate("instance", instance, self._get_scheme())
+        except ValidationError as e:
+            raise exceptions.ScaleIOValidationError(e)
+
+    def update(self):
+        """Updates resource instance."""
+
+        instance = self._client.get_instance_of(self._get_name(), self["id"])
+        instance = self._validate(instance)
+
+        fields = set(list(instance) + list(self._instance))
+        for field in fields:
+            try:
+                instance[field]
+            except KeyError:
+                del self._instance[field]
+            else:
+                self._instance[field] = instance[field]
 
 
 class Volume(BaseResource):
@@ -158,7 +179,7 @@ class Volume(BaseResource):
         :returns: volume instance
         """
 
-        volume_size = (size * constants.GIGABYTE) / constants.KILOBYTE
+        volume_size = (size * constants.GIGABYTE) // constants.KILOBYTE
         volume = {
             "volumeSizeInKb": text_type(volume_size),
             "storagePoolId": pool

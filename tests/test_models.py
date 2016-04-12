@@ -16,7 +16,7 @@ from pyscaleio import exceptions
 
 from pyscaleio import ScaleIOClient
 from pyscaleio.manager import ScaleIOClientsManager
-from pyscaleio.models import BaseResource
+from pyscaleio.models import BaseResource, Volume
 
 
 @pytest.fixture
@@ -181,3 +181,87 @@ def test_model_initialize_negative(client, modelklass):
 
         with pytest.raises(psys.Error):
             klass(instance_id="test", instance={"id": "test"})
+
+
+def test_model_validation(client, modelklass):
+
+    klass = modelklass("Volume", (BaseResource,), {
+        "__scheme__": {
+            "name": String()
+        }
+    })
+
+    volume_payload = mock_resource_get("Volume", "test", {
+        "id": "test",
+        "name": "test_volume"
+    })
+    with httmock.HTTMock(login_payload, volume_payload):
+        volume = klass("test")
+        assert volume.get("id") == "test"
+        assert volume.get("name") == "test_volume"
+
+
+def test_model_validation_negative(client, modelklass):
+
+    klass = modelklass("Volume", (BaseResource,), {
+        "__scheme__": {
+            "name": String()
+        }
+    })
+    volume_payload = mock_resource_get("Volume", "test", {"id": "test"})
+    with httmock.HTTMock(login_payload, volume_payload):
+        with pytest.raises(exceptions.ScaleIOValidationError) as e:
+            klass("test")
+        assert "instance['name'] is missing" in str(e)
+
+
+@pytest.mark.parametrize(("old_payload", "new_payload"), [
+    (
+        {"id": "test", "name": "test_volume"},
+        {"id": "test", "name": "test_volume_changed"},
+    ),
+    (
+        {"id": "test"},
+        {"id": "test", "name": "test_volume"},
+    ),
+    (
+        {"id": "test", "name": "test_volume"},
+        {"id": "test"},
+    )
+])
+def test_model_update(client, modelklass, old_payload, new_payload):
+
+    klass = modelklass("Volume", (BaseResource,), {
+        "__scheme__": {
+            "name": String(optional=True)
+        }
+    })
+    volume_payload = mock_resource_get("Volume", "test", old_payload)
+    volume_update_payload = mock_resource_get("Volume", "test", new_payload)
+
+    with httmock.HTTMock(login_payload, volume_payload):
+        volume = klass("test")
+        assert volume == old_payload
+
+    with httmock.HTTMock(volume_update_payload):
+        volume.update()
+        assert volume == new_payload
+
+
+def test_volume_model(client, modelklass):
+
+    volume_payload = mock_resource_get(Volume._get_name(), "test", {
+        "id": "test",
+        "sizeInKb": (8 * constants.GIGABYTE) // constants.KILOBYTE,
+        "storagePoolId": "test_pool",
+        "useRmcache": False,
+        "volumeType": "ThickProvisioned"
+    })
+    with httmock.HTTMock(login_payload, volume_payload):
+        volume = Volume("test")
+
+        assert volume.name is None
+        assert volume.size == 8 * constants.GIGABYTE
+        assert volume.type == "ThickProvisioned"
+        assert isinstance(volume.exports, list)
+        assert not volume.exports

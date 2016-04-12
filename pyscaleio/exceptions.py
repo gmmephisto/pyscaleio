@@ -41,3 +41,9 @@ class ScaleIOEmptyClientRegistry(Error):
     def __init__(self):
         super(ScaleIOEmptyClientRegistry, self).__init__(
             "Clients for ScaleIO not registered.")
+
+
+class ScaleIOValidationError(Error):
+    def __init__(self, exc):
+        super(ScaleIOValidationError, self).__init__(
+            "Resource validation error: {0}", exc)
