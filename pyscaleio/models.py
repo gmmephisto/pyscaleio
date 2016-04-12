@@ -23,7 +23,7 @@ class BaseResource(Mapping):
             DictScheme({
                 "href": String(),
                 "rel": String()
-            })
+            }), optional=True
         )
     }
     __resource__ = None
@@ -54,7 +54,7 @@ class BaseResource(Mapping):
         for base in cls.mro():
             if bool(
                 issubclass(base, BaseResource) and
-                getattr(base, "__scheme__")
+                getattr(base, "__scheme__", None)
             ):
                 scheme.update(base.__scheme__)
 
@@ -102,7 +102,7 @@ class BaseResource(Mapping):
         if instance_id:
             instance = self._client.get_instance_of(self._get_name(), instance_id)
 
-        self._instance = validate("instance", instance, self._get_scheme())
+        self._instance = validate("instance", instance or {}, self._get_scheme())
 
     def __getitem__(self, key):
         return self._instance[key]
