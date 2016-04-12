@@ -1,3 +1,4 @@
+object-validator
 psys
 requests
 six
