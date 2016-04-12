@@ -7,6 +7,7 @@ import requests
 from six.moves.urllib.parse import urljoin
 
 from pyscaleio import exceptions
+from pyscaleio import utils
 
 
 requests.packages.urllib3.disable_warnings()
@@ -187,6 +188,7 @@ class ScaleIOClient(object):
 
         return self._session.get("instances")
 
+    @utils.drop_none
     def get_instances_of(self, resourse, params=None):
         """Returns list of instances of specified resource."""
 
@@ -194,6 +196,7 @@ class ScaleIOClient(object):
             type=resourse), params=params
         )
 
+    @utils.drop_none
     def get_instance_of(self, resourse, resourse_id):
         """Returns instance of specified resource type by id."""
 
