@@ -255,13 +255,13 @@ def test_volume_model(client, modelklass):
         "sizeInKb": (8 * constants.GIGABYTE) // constants.KILOBYTE,
         "storagePoolId": "test_pool",
         "useRmcache": False,
-        "volumeType": "ThickProvisioned"
+        "volumeType": constants.VOLUME_TYPE_THICK
     })
     with httmock.HTTMock(login_payload, volume_payload):
         volume = Volume("test")
 
         assert volume.name is None
         assert volume.size == 8 * constants.GIGABYTE
-        assert volume.type == "ThickProvisioned"
+        assert volume.type == constants.VOLUME_TYPE_THICK
         assert isinstance(volume.exports, list)
         assert not volume.exports

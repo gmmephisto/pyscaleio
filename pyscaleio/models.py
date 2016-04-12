@@ -134,6 +134,11 @@ class BaseResource(Mapping):
             else:
                 self._instance[field] = instance[field]
 
+    def perform(self, action, data):
+        """Performs action on resource instance."""
+
+        return self._client.perform_action_on(self._get_name(), self["id"], action, data)
+
 
 class Volume(BaseResource):
     """Volume resource model."""
@@ -149,10 +154,9 @@ class Volume(BaseResource):
         "useRmcache": Bool(),
         "sizeInKb": Integer(),
         "storagePoolId": String(),
-        "volumeType": String(choices=[
-            "ThinProvisioned",
-            "ThickProvisioned",
-        ]),
+        "volumeType": String(
+            choices=constants.VOLUME_TYPES
+        ),
     }
 
     @classmethod
@@ -166,14 +170,13 @@ class Volume(BaseResource):
         return cls(volume_id, **kwargs)
 
     @classmethod
-    def create(cls, size, pool, name=None,
-               volume_type=None, rmcache=None, **kwargs):
+    def create(cls, size, pool, name=None, rmcache=None, thin=True, **kwargs):
         """Creates Volume instance.
 
         :param size: volume size in GB (required)
         :param pool: storage pool id (required)
         :param name: volume name
-        :param volume_type: type of volume (Thin|Thick)
+        :param thin: is volume 'thin' or 'thick' provisioned
         :param rmcache: volume rmcache
 
         :returns: volume instance
@@ -186,10 +189,12 @@ class Volume(BaseResource):
         }
         if name:
             volume["name"] = name
-        if volume_type:
-            volume["volumeType"] = volume_type
         if rmcache:
             volume["useRmcache"] = rmcache
+
+        volume["volumeType"] = constants.VOLUME_TYPE_THICK
+        if thin:
+            volume["volumeType"] = constants.VOLUME_TYPE_THIN
 
         return super(Volume, cls).create(volume, **kwargs)
 
@@ -210,26 +215,61 @@ class Volume(BaseResource):
         return self.get("mappedSdcInfo", [])
 
     def rename(self, name):
-        """Changes volume name."""
+        """Changes volume name.
 
-        raise NotImplementedError()
+        :param name: new volume name
+        """
+
+        return super(Volume, self).perform(
+            "setVolumeName", {"newName": name})
 
     def resize(self, size):
-        """Changes volumes size."""
+        """Changes volumes size.
 
-        raise NotImplementedError()
+        :param size: new volume size in GB (required)
+        """
 
-    def export(self, sdc_id=None, sdc_guid=None):
+        return super(Volume, self).perform(
+            "setVolumeSize", {"sizeInGB": size})
+
+    def export(self, sdc_id=None, sdc_guid=None, multiple=False):
         """Exports volume to specified SDC."""
 
-        raise NotImplementedError()
+        if sdc_id and sdc_guid:
+            raise Error("Use either 'sdc_id' or 'sdc_guid', not both.")
+
+        data = {}
+        if sdc_id:
+            data["sdcId"] = sdc_id
+        if sdc_guid:
+            data["guid"] = sdc_guid
+
+        if multiple:
+            data["allowMultipleMappings"] = "TRUE"
+
+        return super(Volume, self).perform("addMappedSdc", data)
 
     def unexport(self, sdc_id=None, sdc_guid=None):
         """Unexports volume from specified SDC."""
 
-        raise NotImplementedError()
+        if sdc_id and sdc_guid:
+            raise Error("Use either 'sdc_id' or 'sdc_guid', not both.")
 
-    def delete(self, mode=None):
-        """Removes volume with specified mode."""
+        data = {}
+        if sdc_id:
+            data["sdcId"] = sdc_id
+        elif sdc_guid:
+            data["guid"] = sdc_guid
+        else:
+            data["allSdcs"] = ""
 
-        raise NotImplementedError()
+        return super(Volume, self).perform("removeMappedSdc", data)
+
+    def delete(self, mode=constants.VOLUME_REMOVE_ONLY_ME):
+        """Removes volume with specified mode.
+
+        :param mode: volume remove mode
+        """
+
+        return super(Volume, self).perform(
+            "removeVolume", {"removeMode": mode})
