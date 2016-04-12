@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+* Added RPM spec and targets to Makefile
+* Freeze package requirements
+* Added Volume resource methods
+* Added custom validation error and smart model update
+* Added tests for resource models
+* Small fixes in base resource class
+* Change resource name getter
+* Update changelog
 * Fix tests running
 * Added Base and Volume resource models with validation
 * Drop response keys with None values
