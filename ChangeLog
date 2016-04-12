@@ -1,6 +1,19 @@
 CHANGES
 =======
 
+* Fix tests running
+* Added Base and Volume resource models with validation
+* Drop response keys with None values
+* Added scheme to session endpoint url
+* Fix typos in docstrings
+* Move client manager to separate module
+* Added client manager singleton
+* Added methods for create and action operations
+* Move exceptions to separate module
+* Added py34 support and six package
+* Added test for malformed response
+* Use custom httmock in unittest
+* Update changelog
 * Added logout method to scaleio client
 * Added tests for scaleio client
 * Added params argument to get requests
