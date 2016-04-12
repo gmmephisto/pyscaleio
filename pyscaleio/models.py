@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from collections import Mapping
 
+from inflection import camelize, underscore
 from object_validator import validate
 from object_validator import DictScheme, List, String, Integer, Bool
 
@@ -41,6 +42,13 @@ class BaseResource(Mapping):
             return pyscaleio.get_client(host)
 
     @classmethod
+    def _get_name(cls):
+        resource = cls.__resource__
+        if not resource:
+            resource = camelize(underscore(cls.__name__))
+        return resource
+
+    @classmethod
     def _get_scheme(cls):
         scheme = {}
         for base in cls.mro():
@@ -57,7 +65,7 @@ class BaseResource(Mapping):
         """Created instance of resource."""
 
         client = cls._get_client(**kwargs)
-        instance_id = client.create_instance_of(cls.__name__, instance)
+        instance_id = client.create_instance_of(cls._get_name(), instance)
 
         return cls(instance_id, **kwargs)
 
@@ -73,12 +81,12 @@ class BaseResource(Mapping):
 
         client = cls._get_client(**kwargs)
         if not instance_ids:
-            instances = client.get_instances_of(cls.__name__)
+            instances = client.get_instances_of(cls._get_name())
         else:
             if isinstance(instance_ids, basestring):
                 instance_ids = (instance_ids,)
             instances = client.perform_actions_on(
-                cls.__name__, "queryBySelectedIds", {"ids": instance_ids})
+                cls._get_name(), "queryBySelectedIds", {"ids": instance_ids})
 
         return [cls(instance=instance, client=client)
             for instance in instances
@@ -104,13 +112,6 @@ class BaseResource(Mapping):
 
     def __len__(self):
         return len(self._instance)
-
-    def _get_name(self):
-        resource = getattr(self, "__resource__")
-        if not resource:
-            resource = self.__class__.__name__
-            resource = resource.lower().capitalize()
-        return resource
 
 
 class Volume(BaseResource):
