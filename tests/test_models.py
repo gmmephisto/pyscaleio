@@ -159,7 +159,7 @@ def test_model_get_client_negative(client, modelklass):
     with mock.patch("pyscaleio.models.BaseResource.__scheme__", {}):
         klass = modelklass("Test", (BaseResource,), {"__scheme__": {}})
 
-        with pytest.raises(psys.Error):
+        with pytest.raises(exceptions.ScaleIONotBothParameters):
             klass._get_client(client="test", host="test")
 
         with pytest.raises(exceptions.ScaleIOInvalidClient):
@@ -188,7 +188,7 @@ def test_model_initialize_negative(client, modelklass):
     with mock.patch("pyscaleio.models.BaseResource.__scheme__", {}):
         klass = modelklass("Volume", (BaseResource,), {"__scheme__": {}})
 
-        with pytest.raises(psys.Error):
+        with pytest.raises(exceptions.ScaleIONotBothParameters):
             klass(instance_id="test", instance={"id": "test"})
 
 

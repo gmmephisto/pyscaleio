@@ -47,3 +47,14 @@ class ScaleIOValidationError(Error):
     def __init__(self, exc):
         super(ScaleIOValidationError, self).__init__(
             "Resource validation error: {0}", exc)
+
+
+class ScaleIOInvalidParameters(Error):
+    def __init__(self, *args, **kwargs):
+        super(ScaleIOInvalidParameters, self).__init__(*args, **kwargs)
+
+
+class ScaleIONotBothParameters(ScaleIOInvalidParameters):
+    def __init__(self, first, second):
+        super(ScaleIONotBothParameters, self).__init__(
+            "Use either '{0}' or '{1}', not both", first, second)

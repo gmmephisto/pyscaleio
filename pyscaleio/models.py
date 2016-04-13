@@ -6,7 +6,6 @@ from inflection import camelize, underscore
 from object_validator import validate, ValidationError
 from object_validator import DictScheme, List, String, Integer, Bool
 
-from psys import Error
 from six import text_type as str
 
 import pyscaleio
@@ -53,7 +52,7 @@ class BaseResource(Mapping):
 
         host, client = kwargs.get("host"), kwargs.get("client")
         if host and client:
-            raise Error("Invalid configuration")
+            raise exceptions.ScaleIONotBothParameters("host", "client")
 
         if client:
             if not isinstance(client, pyscaleio.ScaleIOClient):
@@ -125,7 +124,7 @@ class BaseResource(Mapping):
         self._scheme = {}
 
         if instance_id and instance:
-            raise Error("Both 'instance_id' and 'instance' cannot be specified.")
+            raise exceptions.ScaleIONotBothParameters("instance_id", "instance")
 
         if instance_id:
             instance = self._client.get_instance_of(self._get_name(), instance_id)
@@ -439,7 +438,7 @@ class Volume(MutableResource):
         """
 
         if sdc_id and sdc_guid:
-            raise Error("Use either 'sdc_id' or 'sdc_guid', not both.")
+            raise exceptions.ScaleIONotBothParameters("sdc_id", "sdc_guid")
 
         data = {}
         if sdc_id:
@@ -461,7 +460,7 @@ class Volume(MutableResource):
         """
 
         if sdc_id and sdc_guid:
-            raise Error("Use either 'sdc_id' or 'sdc_guid', not both.")
+            raise exceptions.ScaleIONotBothParameters("sdc_id", "sdc_guid")
 
         data = {}
         if sdc_id:
