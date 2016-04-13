@@ -427,7 +427,7 @@ class Volume(MutableResource):
         :param size: new volume size in GB (required)
         """
 
-        return super(Volume, self).perform("setVolumeSize", {"sizeInGB": size})
+        return super(Volume, self).perform("setVolumeSize", {"sizeInGB": str(size)})
 
     def export(self, sdc_id=None, sdc_guid=None, multiple=False):
         """Exports volume to specified SDC.
