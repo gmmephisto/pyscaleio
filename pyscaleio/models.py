@@ -26,7 +26,23 @@ class BaseResource(Mapping):
             }), optional=True
         )
     }
+    """Data scheme for instance validation."""
+
+    __parents__ = None
+    """
+    References to parent resources by fields.
+
+    Example:
+        frozenset([
+            ("parentField", "ResourceClassName")
+        ])
+    """
+
     __resource__ = None
+    """
+    Custom resource name that overrides default
+    name based on name of resource class.
+    """
 
     @staticmethod
     def _get_client(**kwargs):
@@ -157,6 +173,88 @@ class System(BaseResource):
         return self["restrictedSdcModeEnabled"]
 
 
+class ProtectionDomain(BaseResource):
+    """ProtectionDomain resource model."""
+
+    __scheme__ = {
+        "name": String(),
+        "systemId": String(),
+    }
+    __parents__ = frozenset([
+        ("systemId", "System")
+    ])
+
+    @property
+    def name(self):
+        return self["name"]
+
+
+class StoragePool(BaseResource):
+    """StoragePool resource model."""
+
+    __scheme__ = {
+        "name": String(optional=True),
+        "protectionDomainId": String(),
+        "checksumEnabled": Bool(),
+        "useRfcache": Bool(),
+    }
+    __parents__ = frozenset([
+        ("protectionDomainId", "ProtectionDomain")
+    ])
+
+
+class SDC(BaseResource):
+    """SDC resource model."""
+
+    __scheme__ = {
+        "name": String(optional=True),
+        "sdcIp": String(),
+        "sdcGuid": String(),
+        "sdcApproved": Bool(),
+    }
+    __parents__ = frozenset([
+        ("systemId", "System")
+    ])
+
+    @classmethod
+    def all_approved(cls, **kwargs):
+        """Returns list of all approved SDCs."""
+
+        client = cls._get_client(**kwargs)
+        instances = client.perform_actions_on(
+            cls._get_name(), "queryAllApprovedSdc", {})
+
+        return [cls(instance=instance, client=client)
+            for instance in instances
+        ]
+
+    @classmethod
+    def one_by_ip(cls, ip_address, **kwargs):
+        """Returns SDC instance by specified IP address."""
+
+        client = cls._get_client(**kwargs)
+        instance = client.perform_actions_on(
+            cls._get_name(), "queryIdByKey", {"ip": ip_address})
+
+        return cls(instance=instance, client=client)
+
+    @property
+    def name(self):
+        return self.get("name")
+
+    @property
+    def ip(self):
+        return self["sdcIp"]
+
+    @property
+    def guid(self):
+        return self["sdcGuid"]
+
+    @property
+    def is_approved(self):
+        return self["sdcApproved"]
+
+
 class Volume(BaseResource):
     """Volume resource model."""
 
@@ -175,6 +273,10 @@ class Volume(BaseResource):
             choices=constants.VOLUME_TYPES
         ),
     }
+    __parents__ = frozenset([
+        ("storagePoolId", "StoragePool"),
+        ("vtreeId", "VTree"),
+    ])
 
     @classmethod
     def one_by_name(cls, name, **kwargs):
