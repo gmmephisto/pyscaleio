@@ -77,15 +77,6 @@ class BaseResource(Mapping):
         return DictScheme(scheme, ignore_unknown=True)
 
     @classmethod
-    def create(cls, instance, **kwargs):
-        """Created instance of resource."""
-
-        client = cls._get_client(**kwargs)
-        instance_id = client.create_instance_of(cls._get_name(), instance)
-
-        return cls(instance_id, **kwargs)
-
-    @classmethod
     def one(cls, instance_id, **kwargs):
         """Returns instance of resource."""
 
@@ -150,13 +141,35 @@ class BaseResource(Mapping):
             else:
                 self._instance[field] = instance[field]
 
+
+class EditableResource(BaseResource):
+    """Resource model with editable properties."""
+
     def perform(self, action, data):
         """Performs action on resource instance."""
 
         return self._client.perform_action_on(self._get_name(), self["id"], action, data)
 
 
-class System(BaseResource):
+class MutableResource(EditableResource):
+    """Resource model that can be created/deleted."""
+
+    @classmethod
+    def create(cls, instance, **kwargs):
+        """Created instance of resource."""
+
+        client = cls._get_client(**kwargs)
+        instance_id = client.create_instance_of(cls._get_name(), instance)
+
+        return cls(instance_id, **kwargs)
+
+    def delete(self, data=None):
+        """Deletes instance of resource."""
+
+        self.perform("remove{0}".format(self._get_name()), data or {})
+
+
+class System(EditableResource):
     """System resource model."""
 
     __scheme__ = {
@@ -173,7 +186,7 @@ class System(BaseResource):
         return self["restrictedSdcModeEnabled"]
 
 
-class ProtectionDomain(BaseResource):
+class ProtectionDomain(MutableResource):
     """ProtectionDomain resource model."""
 
     __scheme__ = {
@@ -189,7 +202,7 @@ class ProtectionDomain(BaseResource):
         return self["name"]
 
 
-class StoragePool(BaseResource):
+class StoragePool(MutableResource):
     """StoragePool resource model."""
 
     __scheme__ = {
@@ -203,7 +216,22 @@ class StoragePool(BaseResource):
     ])
 
 
-class SDC(BaseResource):
+class VTree(BaseResource):
+    """Volume Tree (VTree) resource model."""
+
+    __scheme__ = {
+        "name": String(optional=True),
+        "baseVolumeId": String(),
+        "storagePoolId": String(),
+    }
+
+    __parents__ = frozenset([
+        ("baseVolumeId", "Volume"),
+        ("storagePoolId", "StoragePool")
+    ])
+
+
+class SDC(MutableResource):
     """SDC resource model."""
 
     __scheme__ = {
@@ -255,7 +283,7 @@ class SDC(BaseResource):
         return self["sdcApproved"]
 
 
-class Volume(BaseResource):
+class Volume(MutableResource):
     """Volume resource model."""
 
     __scheme__ = {
@@ -388,4 +416,4 @@ class Volume(BaseResource):
         :param mode: volume remove mode
         """
 
-        return super(Volume, self).perform("removeVolume", {"removeMode": mode})
+        return super(Volume, self).delete({"removeMode": mode})
