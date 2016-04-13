@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import collections
 import json
 import requests
@@ -8,6 +10,7 @@ import pytest
 
 from httmock import HTTMock
 from psys import Error
+from six import text_type as str
 
 from pyscaleio import exceptions
 from pyscaleio.client import ScaleIOSession, ScaleIOClient
@@ -61,6 +64,11 @@ def mock_instances_payload(resource, payload):
         return httmock.response(200,
             json.dumps(payload), request=request)
     return instances_of_payload
+
+
+@httmock.urlmatch(path=r".*/types/(\w+)/instances", method="post")
+def create_instance_payload(url, request):
+    return httmock.response(201, {"id": "test"}, request=request)
 
 
 @pytest.mark.parametrize(("is_secure", "scheme"), [
@@ -305,6 +313,17 @@ def test_client_getters():
         result = client.get_instances_of("Resource")
         assert result
         assert isinstance(result, list)
+
+
+def test_client_create_instance():
+
+    client = ScaleIOClient.from_args("localhost", "admin", "passwd")
+
+    with HTTMock(login_payload, create_instance_payload):
+        instance_id = client.create_instance_of(
+            "Volume", {"name": "test_volume"})
+        assert isinstance(instance_id, str)
+        assert instance_id == "test"
 
 
 def test_client_lazy_get_system():
