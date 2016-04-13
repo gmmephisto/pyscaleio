@@ -2,8 +2,8 @@ from .client import ScaleIOSession, ScaleIOClient
 from .manager import ScaleIOClientsManager
 
 __all__ = (
-    ScaleIOSession,
-    ScaleIOClient,
+    ScaleIOSession.__name__,
+    ScaleIOClient.__name__,
 )
 
 __version__ = "0.0.1"
