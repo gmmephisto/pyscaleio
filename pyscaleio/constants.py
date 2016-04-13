@@ -61,3 +61,7 @@ VOLUME_REMOVE_MODES = [
     VOLUME_REMOVE_VTREE,
 ]
 """Valid volume remove modes"""
+
+
+VOLUME_PATH = "emc-vol-{system_id}-{volume_id}"
+"""Default template for volume path on SDC."""

@@ -407,6 +407,13 @@ class Volume(MutableResource):
     def exports(self):
         return self.get("mappedSdcInfo", [])
 
+    @property
+    def path(self):
+        return constants.VOLUME_PATH.format(
+            system_id=self._client.system["id"],
+            volume_id=self["id"]
+        )
+
     def rename(self, name):
         """Changes volume name.
 

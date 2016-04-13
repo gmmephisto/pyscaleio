@@ -16,7 +16,7 @@ from pyscaleio import exceptions
 
 from pyscaleio import ScaleIOClient
 from pyscaleio.manager import ScaleIOClientsManager
-from pyscaleio.models import BaseResource, Volume
+from pyscaleio.models import BaseResource, Volume, System
 
 
 @pytest.fixture
@@ -55,6 +55,15 @@ def mock_resource_get(resource, resource_id, payload):
     def instance_of_payload(url, request):
         return httmock.response(200, payload, request=request)
     return instance_of_payload
+
+
+def mock_resources_get(resource, payload):
+    path = r".*/api/types/{0}/instances".format(resource)
+
+    @httmock.urlmatch(path=path, method="get")
+    def instances_of_payload(url, request):
+        return httmock.response(200, payload, request=request)
+    return instances_of_payload
 
 
 def test_base_model_name(client):
@@ -257,7 +266,10 @@ def test_volume_model(client, modelklass):
         "useRmcache": False,
         "volumeType": constants.VOLUME_TYPE_THICK
     })
-    with httmock.HTTMock(login_payload, volume_payload):
+    sysem_payload = mock_resources_get(System._get_name(), [{
+        "id": "system"
+    }])
+    with httmock.HTTMock(login_payload, volume_payload, sysem_payload):
         volume = Volume("test")
 
         assert volume.name is None
@@ -265,3 +277,6 @@ def test_volume_model(client, modelklass):
         assert volume.type == constants.VOLUME_TYPE_THICK
         assert isinstance(volume.exports, list)
         assert not volume.exports
+
+        with mock.patch("pyscaleio.models.System.__scheme__", {}):
+            assert volume.path == "emc-vol-system-test"
