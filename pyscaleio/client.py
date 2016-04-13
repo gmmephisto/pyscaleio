@@ -8,6 +8,7 @@ from six.moves.urllib.parse import urljoin
 
 from pyscaleio import exceptions
 from pyscaleio import utils
+from pyscaleio.models import System
 
 
 requests.packages.urllib3.disable_warnings()
@@ -173,10 +174,17 @@ class ScaleIOClient(object):
             raise psys.Error(
                 "ScaleIOClient must be initialized with ScaleIOSession.")
         self._session = session
+        self._system = None
 
     @property
     def session(self):
         return self._session
+
+    @property
+    def system(self):
+        if not self._system:
+            self._system = System.all(client=self)[0]
+        return self._system
 
     def get_version(self):
         """Returns ScaleIO REST API version."""

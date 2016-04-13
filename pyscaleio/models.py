@@ -140,6 +140,23 @@ class BaseResource(Mapping):
         return self._client.perform_action_on(self._get_name(), self["id"], action, data)
 
 
+class System(BaseResource):
+    """System resource model."""
+
+    __scheme__ = {
+        "name": String(optional=True),
+        "restrictedSdcModeEnabled": Bool(),
+    }
+
+    @property
+    def name(self):
+        return self.get("name")
+
+    @property
+    def is_restricted(self):
+        return self["restrictedSdcModeEnabled"]
+
+
 class Volume(BaseResource):
     """Volume resource model."""
 

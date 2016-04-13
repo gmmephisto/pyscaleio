@@ -13,6 +13,7 @@ from pyscaleio import exceptions
 from pyscaleio.client import ScaleIOSession, ScaleIOClient
 from pyscaleio.manager import ScaleIOClientsManager
 import pyscaleio.client
+import pyscaleio.models
 
 
 @pytest.fixture(scope="function")
@@ -51,12 +52,15 @@ def all_instances_payload(url, request):
     }, request=request)
 
 
-@httmock.urlmatch(path=r".*/api/types/(\w+)/instances", method="get")
-def instances_of_payload(url, request):
-    return httmock.response(200, json.dumps([{
-        "field1": 1,
-        "field2": 2
-    }]), request=request)
+def mock_instances_payload(resource, payload):
+    path = r".*/api/types/{0}/instances".format(resource)
+
+    @httmock.urlmatch(path=path, method="get")
+    @httmock.remember_called
+    def instances_of_payload(url, request):
+        return httmock.response(200,
+            json.dumps(payload), request=request)
+    return instances_of_payload
 
 
 @pytest.mark.parametrize(("is_secure", "scheme"), [
@@ -294,10 +298,36 @@ def test_client_getters():
         assert "resourceList" in result
         assert isinstance(result["resourceList"], list)
 
+    instances_of_payload = mock_instances_payload(
+        "Resource", [{"field": 1}, {"field": 2}]
+    )
     with HTTMock(login_payload, instances_of_payload):
         result = client.get_instances_of("Resource")
         assert result
         assert isinstance(result, list)
+
+
+def test_client_lazy_get_system():
+
+    client = ScaleIOClient.from_args("localhost", "admin", "passwd")
+
+    systems_payload = mock_instances_payload(
+        "System", [{"id": "test", "name": "test_name"}]
+    )
+    with HTTMock(login_payload, systems_payload):
+        with mock.patch("pyscaleio.models.System.__scheme__", {}):
+            result = client.system
+
+            assert systems_payload.call["called"]
+            assert systems_payload.call["count"] == 1
+
+            assert isinstance(result, pyscaleio.models.System)
+            assert result["id"] == "test"
+
+            second_result = client.system
+            assert result == second_result
+
+            assert systems_payload.call["count"] == 1
 
 
 def test_client_manager_register(manager):
