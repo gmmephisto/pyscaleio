@@ -257,7 +257,7 @@ def test_model_update(client, modelklass, old_payload, new_payload):
         assert volume == new_payload
 
 
-def test_volume_model(client, modelklass):
+def test_volume_model(client):
 
     volume_payload = mock_resource_get(Volume._get_name(), "test", {
         "id": "test",
@@ -280,3 +280,48 @@ def test_volume_model(client, modelklass):
 
         with mock.patch("pyscaleio.models.System.__scheme__", {}):
             assert volume.path == "emc-vol-system-test"
+
+
+@pytest.mark.parametrize(("kw", "result"), [
+    ({"sdc_id": "test"}, {"sdcId": "test"}),
+    ({"sdc_guid": "test"}, {"guid": "test"}),
+    (
+        {"sdc_id": "test", "multiple": True},
+        {"sdcId": "test", "allowMultipleMappings": "TRUE"}
+    ),
+])
+def test_volume_export(client, kw, result):
+
+    with mock.patch("pyscaleio.models.Volume.__scheme__", {}):
+        volume = Volume(instance={"id": "test", "links": []})
+
+    with mock.patch("pyscaleio.ScaleIOClient.perform_action_on") as m:
+        volume.export(**kw)
+        m.assert_called_once_with("Volume", "test", "addMappedSdc", result)
+
+
+@pytest.mark.parametrize(("kw", "result"), [
+    ({"sdc_id": "test"}, {"sdcId": "test"}),
+    ({"sdc_guid": "test"}, {"guid": "test"}),
+    ({}, {"allSdcs": ""})
+])
+def test_volume_unexport(client, kw, result):
+
+    with mock.patch("pyscaleio.models.Volume.__scheme__", {}):
+        volume = Volume(instance={"id": "test", "links": []})
+
+    with mock.patch("pyscaleio.ScaleIOClient.perform_action_on") as m:
+        volume.unexport(**kw)
+        m.assert_called_once_with("Volume", "test", "removeMappedSdc", result)
+
+
+@pytest.mark.parametrize("method", ["export", "unexport"])
+def test_volume_unexport_negative(client, method):
+
+    with mock.patch("pyscaleio.models.Volume.__scheme__", {}):
+        volume = Volume(instance={"id": "test", "links": []})
+
+    with mock.patch("pyscaleio.ScaleIOClient.perform_action_on") as m:
+        with pytest.raises(exceptions.ScaleIONotBothParameters):
+            getattr(volume, method)(**{"sdc_id": "test", "sdc_guid": "test"})
+        m.assert_not_called()
