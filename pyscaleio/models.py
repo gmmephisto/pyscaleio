@@ -7,7 +7,7 @@ from object_validator import validate, ValidationError
 from object_validator import DictScheme, List, String, Integer, Bool
 
 from psys import Error
-from six import text_type
+from six import text_type as str
 
 import pyscaleio
 from pyscaleio import constants
@@ -284,7 +284,7 @@ class Volume(BaseResource):
 
         client = cls._get_client(**kwargs)
         volume_id = client.perform_actions_on(
-            cls.__name__, "queryIdByKey", {"name": name})
+            cls._get_name(), "queryIdByKey", {"name": name})
 
         return cls(volume_id, **kwargs)
 
@@ -303,7 +303,7 @@ class Volume(BaseResource):
 
         volume_size = (size * constants.GIGABYTE) // constants.KILOBYTE
         volume = {
-            "volumeSizeInKb": text_type(volume_size),
+            "volumeSizeInKb": str(volume_size),
             "storagePoolId": pool
         }
         if name:
@@ -339,8 +339,7 @@ class Volume(BaseResource):
         :param name: new volume name
         """
 
-        return super(Volume, self).perform(
-            "setVolumeName", {"newName": name})
+        return super(Volume, self).perform("setVolumeName", {"newName": name})
 
     def resize(self, size):
         """Changes volumes size.
@@ -348,8 +347,7 @@ class Volume(BaseResource):
         :param size: new volume size in GB (required)
         """
 
-        return super(Volume, self).perform(
-            "setVolumeSize", {"sizeInGB": size})
+        return super(Volume, self).perform("setVolumeSize", {"sizeInGB": size})
 
     def export(self, sdc_id=None, sdc_guid=None, multiple=False):
         """Exports volume to specified SDC."""
@@ -390,5 +388,4 @@ class Volume(BaseResource):
         :param mode: volume remove mode
         """
 
-        return super(Volume, self).perform(
-            "removeVolume", {"removeMode": mode})
+        return super(Volume, self).perform("removeVolume", {"removeMode": mode})
