@@ -9,6 +9,7 @@ import pytest
 import httmock
 
 from object_validator import String, Integer, DictScheme
+from six import text_type as str
 
 import pyscaleio
 from pyscaleio import constants
@@ -325,3 +326,48 @@ def test_volume_unexport_negative(client, method):
         with pytest.raises(exceptions.ScaleIONotBothParameters):
             getattr(volume, method)(**{"sdc_id": "test", "sdc_guid": "test"})
         m.assert_not_called()
+
+
+@pytest.mark.parametrize(("kw", "result"), [
+    ({"name": "test"}, {"name": "test"}),
+    ({"rmcache": True}, {"useRmcache": True}),
+    ({"thin": False}, {"volumeType": constants.VOLUME_TYPE_THICK}),
+])
+def test_volume_create(client, kw, result):
+
+    args = (1, "test_pool")
+    full_result = {
+        "volumeSizeInKb": str(1048576),
+        "storagePoolId": "test_pool",
+        "volumeType": constants.VOLUME_TYPE_THIN,
+    }
+    full_result.update(result)
+
+    with mock.patch("pyscaleio.models.MutableResource.create") as m:
+        Volume.create(*args, **kw)
+        m.assert_called_once_with(full_result)
+
+
+def test_volume_one_by_name(client):
+
+    volume_id = "test_id"
+    volume_name = "test_name"
+
+    volume_payload = mock_resource_get(Volume._get_name(), volume_id, {
+        "id": volume_id,
+        "name": volume_name
+    })
+
+    call_args = (Volume._get_name(), "queryIdByKey", {"name": volume_name})
+    with mock.patch("pyscaleio.models.Volume.__scheme__", {}):
+        with mock.patch(
+            "pyscaleio.ScaleIOClient.perform_actions_on",
+            side_effect=[volume_id]
+        ) as m:
+            with httmock.HTTMock(login_payload, volume_payload):
+                volume = Volume.one_by_name(volume_name)
+            m.assert_called_once_with(*call_args)
+
+            assert isinstance(volume, Volume)
+            assert volume.name == volume_name
+            assert volume["id"] == volume_id
