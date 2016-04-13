@@ -46,6 +46,11 @@ class BaseResource(Mapping):
 
     @staticmethod
     def _get_client(**kwargs):
+        """Returns ScaleIOClient instance by specified kwargs.
+
+        Attention: for internal use only!
+        """
+
         host, client = kwargs.get("host"), kwargs.get("client")
         if host and client:
             raise Error("Invalid configuration")
@@ -59,6 +64,11 @@ class BaseResource(Mapping):
 
     @classmethod
     def _get_name(cls):
+        """Returns resource name.
+
+        Attention: for internal use only!
+        """
+
         resource = cls.__resource__
         if not resource:
             resource = camelize(underscore(cls.__name__))
@@ -66,6 +76,11 @@ class BaseResource(Mapping):
 
     @classmethod
     def _get_scheme(cls):
+        """Returns resource scheme for proper validation.
+
+        Attention: for internal use only!
+        """
+
         scheme = {}
         for base in cls.mro():
             if bool(
@@ -78,13 +93,19 @@ class BaseResource(Mapping):
 
     @classmethod
     def one(cls, instance_id, **kwargs):
-        """Returns instance of resource."""
+        """Returns instance of resource.
+
+        :param instance_id: id of resource instance
+        """
 
         return cls(instance_id, **kwargs)
 
     @classmethod
     def all(cls, instance_ids=None, **kwargs):
-        """Returns list of resource instances."""
+        """Returns list of resource instances.
+
+        :param instance_ids: list of instance ids (optional)
+        """
 
         client = cls._get_client(**kwargs)
         if not instance_ids:
@@ -120,7 +141,16 @@ class BaseResource(Mapping):
     def __len__(self):
         return len(self._instance)
 
+    @property
+    def links(self):
+        return self["links"]
+
     def _validate(self, instance):
+        """Validates the instance if resource according to scheme.
+
+        Attention: for internal use only!
+        """
+
         try:
             return validate("instance", instance, self._get_scheme())
         except ValidationError as e:
@@ -146,7 +176,11 @@ class EditableResource(BaseResource):
     """Resource model with editable properties."""
 
     def perform(self, action, data):
-        """Performs action on resource instance."""
+        """Performs action on resource instance.
+
+        :param action: action name
+        :param data: action data payload
+        """
 
         return self._client.perform_action_on(self._get_name(), self["id"], action, data)
 
@@ -156,7 +190,10 @@ class MutableResource(EditableResource):
 
     @classmethod
     def create(cls, instance, **kwargs):
-        """Created instance of resource."""
+        """Created instance of resource.
+
+        :param instance: instance payload
+        """
 
         client = cls._get_client(**kwargs)
         instance_id = client.create_instance_of(cls._get_name(), instance)
@@ -164,7 +201,10 @@ class MutableResource(EditableResource):
         return cls(instance_id, **kwargs)
 
     def delete(self, data=None):
-        """Deletes instance of resource."""
+        """Deletes instance of resource.
+
+        :param data: action data payload (optional)
+        """
 
         self.perform("remove{0}".format(self._get_name()), data or {})
 
@@ -258,7 +298,10 @@ class SDC(MutableResource):
 
     @classmethod
     def one_by_ip(cls, ip_address, **kwargs):
-        """Returns SDC instance by specified IP address."""
+        """Returns SDC instance by specified IP address.
+
+        :param ip_address: IP address of SDC
+        """
 
         client = cls._get_client(**kwargs)
         instance = client.perform_actions_on(
@@ -308,7 +351,10 @@ class Volume(MutableResource):
 
     @classmethod
     def one_by_name(cls, name, **kwargs):
-        """Returns volume instance by name."""
+        """Returns volume instance by name.
+
+        :param name: volume name (required)
+        """
 
         client = cls._get_client(**kwargs)
         volume_id = client.perform_actions_on(
@@ -378,7 +424,12 @@ class Volume(MutableResource):
         return super(Volume, self).perform("setVolumeSize", {"sizeInGB": size})
 
     def export(self, sdc_id=None, sdc_guid=None, multiple=False):
-        """Exports volume to specified SDC."""
+        """Exports volume to specified SDC.
+
+        :param sdc_id: id of SDC instance
+        :param sdc_guid: guid of SDC instance
+        :param multiple: allows export to multiple SDCs (optional)
+        """
 
         if sdc_id and sdc_guid:
             raise Error("Use either 'sdc_id' or 'sdc_guid', not both.")
@@ -395,7 +446,12 @@ class Volume(MutableResource):
         return super(Volume, self).perform("addMappedSdc", data)
 
     def unexport(self, sdc_id=None, sdc_guid=None):
-        """Unexports volume from specified SDC."""
+        """Unexports volume from specified SDC.
+        Without parameters unexports volume from all SDCs
+
+        :param sdc_id: id of SDC instance
+        :param sdc_guid: guid if SDC instance
+        """
 
         if sdc_id and sdc_guid:
             raise Error("Use either 'sdc_id' or 'sdc_guid', not both.")
@@ -413,7 +469,7 @@ class Volume(MutableResource):
     def delete(self, mode=constants.VOLUME_REMOVE_ONLY_ME):
         """Removes volume with specified mode.
 
-        :param mode: volume remove mode
+        :param mode: volume remove mode (optional)
         """
 
         return super(Volume, self).delete({"removeMode": mode})
