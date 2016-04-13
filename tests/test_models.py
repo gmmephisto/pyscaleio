@@ -267,10 +267,10 @@ def test_volume_model(client):
         "useRmcache": False,
         "volumeType": constants.VOLUME_TYPE_THICK
     })
-    sysem_payload = mock_resources_get(System._get_name(), [{
+    system_payload = mock_resources_get(System._get_name(), [{
         "id": "system"
     }])
-    with httmock.HTTMock(login_payload, volume_payload, sysem_payload):
+    with httmock.HTTMock(login_payload, volume_payload, system_payload):
         volume = Volume("test")
 
         assert volume.name is None
