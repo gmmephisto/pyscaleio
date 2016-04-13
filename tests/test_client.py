@@ -26,6 +26,24 @@ def manager(request):
     return m
 
 
+@pytest.fixture(scope="function")
+def mock_session(request):
+    def generate_session(*args, **kwargs):
+        if not args:
+            args = ("localhost", "admin", "passwd")
+        return ScaleIOSession(*args, **kwargs)
+    return generate_session
+
+
+@pytest.fixture(scope="function")
+def mock_client(request):
+    def generate_client(*args, **kwargs):
+        if not args:
+            args = ("localhost", "admin", "passwd")
+        return ScaleIOClient.from_args(*args, **kwargs)
+    return generate_client
+
+
 @httmock.urlmatch(path=r".*login")
 @httmock.remember_called
 def login_payload(url, request):
@@ -74,10 +92,9 @@ def create_instance_payload(url, request):
 @pytest.mark.parametrize(("is_secure", "scheme"), [
     (True, "https"), (False, "http")
 ])
-def test_session_initialize(is_secure, scheme):
+def test_session_initialize(mock_session, is_secure, scheme):
 
-    client = ScaleIOSession(
-        "localhost", "admin", "passwd", is_secure=is_secure)
+    client = mock_session(is_secure=is_secure)
     assert client.host == "localhost"
     assert client.user == "admin"
     assert client.passwd == "passwd"
@@ -94,9 +111,9 @@ def test_session_initialize(is_secure, scheme):
     assert client.endpoint == "{0}://localhost/api/".format(scheme)
 
 
-def test_session_login_positive():
+def test_session_login_positive(mock_session):
 
-    client = ScaleIOSession("localhost", "admin", "passwd")
+    client = mock_session()
     assert not client.token
     assert not client._ScaleIOSession__session.auth
 
@@ -111,7 +128,7 @@ def test_session_login_positive():
     (401, "Unauthorized", exceptions.ScaleIOAuthError),
     (500, "Server error", requests.HTTPError)
 ])
-def test_session_login_negative(code, message, exc):
+def test_session_login_negative(mock_session, code, message, exc):
 
     @httmock.urlmatch(path=r".*login")
     def login_payload(url, request):
@@ -122,7 +139,7 @@ def test_session_login_negative(code, message, exc):
                 "errorCode": 0
             }), request=request)
 
-    client = ScaleIOSession("localhost", "admin", "passwd")
+    client = mock_session()
     assert not client.token
     assert not client._ScaleIOSession__session.auth
 
@@ -139,7 +156,7 @@ def test_session_login_negative(code, message, exc):
     assert not client._ScaleIOSession__session.auth
 
 
-def test_session_send_request():
+def test_session_send_request(mock_session):
 
     @httmock.urlmatch(path=r"/api/test/instance")
     def request_payload(url, request):
@@ -148,7 +165,7 @@ def test_session_send_request():
             request=request
         )
 
-    client = ScaleIOSession("localhost", "admin", "passwd")
+    client = mock_session()
     client.token = "some_token"
 
     with HTTMock(request_payload):
@@ -174,7 +191,7 @@ def test_session_send_request():
         {"response": "test"}, 3
     )
 ])
-def test_session_send_request_retries(effect, result, retries):
+def test_session_send_request_retries(mock_session, effect, result, retries):
 
     mock_handler = mock.Mock(side_effect=effect)
 
@@ -186,7 +203,7 @@ def test_session_send_request_retries(effect, result, retries):
             request=request
         )
 
-    client = ScaleIOSession("localhost", "admin", "passwd")
+    client = mock_session()
     client.token = "expired_token"
 
     with HTTMock(login_payload, request_payload):
@@ -200,13 +217,13 @@ def test_session_send_request_retries(effect, result, retries):
     assert request_payload.call["count"] == retries
 
 
-def test_session_send_request_with_login():
+def test_session_send_request_with_login(mock_session):
 
     @httmock.all_requests
     def api_payload(url, request):
         return httmock.response(200, json.dumps({"response": "test"}))
 
-    client = ScaleIOSession("localhost", "admin", "passwd")
+    client = mock_session()
 
     with HTTMock(login_payload, api_payload):
         result = client.get("test/instance")
@@ -215,7 +232,7 @@ def test_session_send_request_with_login():
     assert client.token == "some_random_token_string"
 
 
-def test_session_send_request_negative():
+def test_session_send_request_negative(mock_session):
 
     @httmock.all_requests
     def api_exception(url, request):
@@ -225,7 +242,7 @@ def test_session_send_request_negative():
             "errorCode": 0
         }))
 
-    client = ScaleIOSession("localhost", "admin", "passwd")
+    client = mock_session()
     assert not client.token
 
     with HTTMock(login_payload, api_exception):
@@ -239,7 +256,7 @@ def test_session_send_request_negative():
     assert "message=Server error" in str(exc)
 
 
-def test_session_send_request_malformed():
+def test_session_send_request_malformed(mock_session):
 
     @httmock.urlmatch(path=r"/api/test/instance")
     def request_payload(url, request):
@@ -248,7 +265,7 @@ def test_session_send_request_malformed():
             request=request
         )
 
-    client = ScaleIOSession("localhost", "admin", "passwd")
+    client = mock_session()
     client.token = "some_token"
 
     with HTTMock(request_payload):
@@ -256,9 +273,9 @@ def test_session_send_request_malformed():
             client.get("test/instance")
 
 
-def test_session_logout():
+def test_session_logout(mock_session):
 
-    client = ScaleIOSession("localhost", "admin", "passwd")
+    client = mock_session()
     assert not client.token
 
     with HTTMock(logout_payload):
@@ -274,16 +291,14 @@ def test_session_logout():
     assert not client.token
 
 
-def test_client_initialize():
+def test_client_initialize(mock_session):
 
     with pytest.raises(Error) as e:
         ScaleIOClient(object())
 
     assert "must be initialized with ScaleIOSession" in str(e)
 
-    client = ScaleIOClient(ScaleIOSession(
-        "localhost", "admin", "passwd"
-    ))
+    client = ScaleIOClient(mock_session())
     assert client
     assert isinstance(client, ScaleIOClient)
 
@@ -296,9 +311,9 @@ def test_client_initialize():
         assert result == pyscaleio.client.__api_version__
 
 
-def test_client_getters():
+def test_client_getters(mock_client):
 
-    client = ScaleIOClient.from_args("localhost", "admin", "passwd")
+    client = mock_client()
 
     with HTTMock(login_payload, all_instances_payload):
         result = client.get_all_instances()
@@ -315,9 +330,9 @@ def test_client_getters():
         assert isinstance(result, list)
 
 
-def test_client_create_instance():
+def test_client_create_instance(mock_client):
 
-    client = ScaleIOClient.from_args("localhost", "admin", "passwd")
+    client = mock_client()
 
     with HTTMock(login_payload, create_instance_payload):
         instance_id = client.create_instance_of(
@@ -326,9 +341,9 @@ def test_client_create_instance():
         assert instance_id == "test"
 
 
-def test_client_lazy_get_system():
+def test_client_lazy_get_system(mock_client):
 
-    client = ScaleIOClient.from_args("localhost", "admin", "passwd")
+    client = mock_client()
 
     systems_payload = mock_instances_payload(
         "System", [{"id": "test", "name": "test_name"}]
