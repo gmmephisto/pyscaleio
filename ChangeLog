@@ -1,6 +1,21 @@
 CHANGES
 =======
 
+* Fix typo in unit tests
+* Added unit tests for create/one_by_name Volume methods
+* Added unit tests for export/unexport Volume methods
+* More code-reusage in unit tests
+* Added unit test for instance creation
+* Added more concrete error for several parameters
+* Use class names on top import
+* Added path getter for Volume resource
+* Update docstrings in models
+* Move create/delete/perform action to subclasses
+* Small fixes and typos
+* Added more resource models and introduce parent relations
+* Added lazy getter for System resource in client
+* Drop keys with None values from action response
+* Update changelog
 * Added RPM spec and targets to Makefile
 * Freeze package requirements
 * Added Volume resource methods
