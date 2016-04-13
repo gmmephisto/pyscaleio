@@ -34,6 +34,8 @@ def drop_none(func):
     True
     >>> drop_none(lambda: [{'a': 'A', 'b': None}])() == [{'a': 'A'}]
     True
+    >>> drop_none(lambda: "test")() == "test"
+    True
     """
 
     @wraps(func)
@@ -41,5 +43,8 @@ def drop_none(func):
         results = func(*args, **kwargs)
         if isinstance(results, MutableSequence):
             return [_drop_none(result) for result in results]
-        return _drop_none(func(*args, **kwargs))
+        elif isinstance(results, MutableMapping):
+            return _drop_none(func(*args, **kwargs))
+        else:
+            return results
     return wrapper

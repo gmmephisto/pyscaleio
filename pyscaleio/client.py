@@ -220,6 +220,7 @@ class ScaleIOClient(object):
             data=psys.u(json.dumps(action_data))
         )
 
+    @utils.drop_none
     def perform_actions_on(self, resource, action, action_data):
         """Performs action on all instances of specified resource type."""
 
