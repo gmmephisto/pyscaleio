@@ -29,6 +29,13 @@ MONTH_SECONDS = 30 * DAY_SECONDS
 """Seconds in average month."""
 
 
+NETWORK_TIMEOUT = 30
+"""Timeout for all network operations."""
+
+REQUEST_RETRIES = 3
+"""Default retries count for HTTP request."""
+
+
 VOLUME_TYPE_THIN = "ThinProvisioned"
 """Volume type with thin provisioning."""
 

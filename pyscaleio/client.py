@@ -6,6 +6,7 @@ import requests
 
 from six.moves.urllib.parse import urljoin
 
+from pyscaleio import constants
 from pyscaleio import exceptions
 from pyscaleio import utils
 from pyscaleio.models import System
@@ -27,17 +28,17 @@ class ScaleIOSession(object):
     __endpoint = "{scheme}://{host}/api/"
     """Endpoint template."""
 
-    def __init__(self, host, user, passwd, is_secure=True):
+    def __init__(self, host, user, passwd, is_secure=True,
+                 retries=constants.REQUEST_RETRIES,
+                 timeout=constants.NETWORK_TIMEOUT):
         self.host = host
         self.scheme = "https" if is_secure else "http"
 
         self.user = user
         self.passwd = passwd
 
-        # TODO: parametrize timeout
-        self.timeout = 30
-        # TODO: parametrize retries
-        self.retries = 3
+        self.timeout = timeout
+        self.retries = retries
 
         self.token = None
         self.headers = {
@@ -78,18 +79,15 @@ class ScaleIOSession(object):
         except (ValueError, TypeError):
             raise exceptions.ScaleIOMalformedError()
 
-    def login(self):
+    def login(self, timeout=None):
         """Logins to ScaleIO REST Gateway."""
-
-        if not self.__session:
-            self.__session = requests.Session()
 
         url = urljoin(self.endpoint, "login")
         auth = (self.user, self.passwd)
 
         response = self.__session.get(
-            url=url, auth=auth,
-            allow_redirects=False, verify=False)
+            url=url, auth=auth, allow_redirects=False,
+            verify=False, timeout=timeout or self.timeout)
         try:
             response.raise_for_status()
         except requests.HTTPError as e:
@@ -101,12 +99,14 @@ class ScaleIOSession(object):
         self.token = self.__response(response)
         self.__session.auth = (self.user, self.token)
 
-    def logout(self):
+    def logout(self, timeout=None):
         """Logout from ScaleIO REST Gateway and invalidates token."""
 
         if self.__session and self.token:
             self.__session.get(
-                url=urljoin(self.endpoint, "logout"))
+                url=urljoin(self.endpoint, "logout"),
+                allow_redirects=False, verify=False,
+                timeout=timeout or self.timeout)
 
         self.token = None
         self.__session.auth = None
