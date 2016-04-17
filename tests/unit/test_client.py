@@ -106,7 +106,7 @@ def test_session_initialize(mock_session, is_secure, scheme):
     headers = client._ScaleIOSession__session.headers
     assert "Accept" in headers
     assert headers["Accept"] == "application/json; version=2.0"
-    assert headers["content-type"] == "application/json"
+    assert headers["Content-Type"] == "application/json"
 
     assert client.endpoint == "{0}://localhost/api/".format(scheme)
 

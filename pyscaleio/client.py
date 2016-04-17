@@ -42,7 +42,7 @@ class ScaleIOSession(object):
 
         self.token = None
         self.headers = {
-            "content-type": "application/json",
+            "Content-Type": "application/json",
             "Accept": "application/json; version={version}".format(
                 version=__api_version__
             )
