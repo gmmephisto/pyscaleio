@@ -1,0 +1,5 @@
+graft tests
+include ChangeLog
+include Makefile
+include python-scaleio.spec
+include README.rst
