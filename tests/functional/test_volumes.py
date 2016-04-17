@@ -1,5 +1,9 @@
+from __future__ import unicode_literals
+
 import os
 import pytest
+
+from six import text_type as str
 
 import pyscaleio
 from pyscaleio import ScaleIOClient, ScaleIOClientsManager
@@ -21,7 +25,7 @@ def _is_test_name(instance):
 def _get_test_name(string):
     """Returns test name for resource."""
 
-    return "pyscaleiotest_{0}".format(string)
+    return TEST_NAME_PREFIX + str(string)
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -118,7 +122,7 @@ def test_volume_export(storage_pool, system):
 
     if system.is_restricted:
         if not SDC.all_approved():
-            pytest.skip("Now one approved SDC in restricted mode.")
+            pytest.skip("No one approved SDC in restricted mode.")
 
     volume = Volume.create(8, storage_pool["id"], name=_get_test_name(1))
     assert not volume.exports
