@@ -95,6 +95,8 @@ class BaseResource(Mapping):
         """Returns instance of resource.
 
         :param instance_id: id of resource instance
+
+        :returns: instance of resource
         """
 
         return cls(instance_id, **kwargs)
@@ -104,6 +106,8 @@ class BaseResource(Mapping):
         """Returns list of resource instances.
 
         :param instance_ids: list of instance ids (optional)
+
+        :returns: list of resource instances
         """
 
         client = cls._get_client(**kwargs)
@@ -300,6 +304,8 @@ class SDC(MutableResource):
         """Returns SDC instance by specified IP address.
 
         :param ip_address: IP address of SDC
+
+        :rtype: pyscaleio.SDC
         """
 
         client = cls._get_client(**kwargs)
@@ -353,6 +359,8 @@ class Volume(MutableResource):
         """Returns volume instance by name.
 
         :param name: volume name (required)
+
+        :rtype: pyscaleio.Volume
         """
 
         client = cls._get_client(**kwargs)
@@ -371,7 +379,7 @@ class Volume(MutableResource):
         :param thin: is volume 'thin' or 'thick' provisioned
         :param rmcache: volume rmcache
 
-        :returns: volume instance
+        :rtype: pyscaleio.Volume
         """
 
         volume_size = (size * constants.GIGABYTE) // constants.KILOBYTE
