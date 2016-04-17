@@ -42,6 +42,10 @@ rpm:
 		--rebuild srpms/$(PACKAGE)-$(VERSION)-$(RELEASE).src.rpm \
 		--resultdir rpms/$(DIST) --no-cleanup-after
 
+copr: srpm
+	@copr-cli build --nowait miushanov/pyscaleio \
+		srpms/$(PACKAGE)-$(VERSION)-$(RELEASE).src.rpm
+
 clean:
 	@rm -rf .coverage .coverage-report .venv/ build/ dist/ \
 			.tox/ *.egg* .eggs/ rpms/ srpms/ *.tar.gz *.rpm
