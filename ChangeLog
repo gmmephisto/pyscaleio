@@ -1,6 +1,19 @@
 CHANGES
 =======
 
+* Added copr build target in Makefile
+* Added MANIFEST.in
+* Added README
+* Added .travis.yml with coveralls
+* Update docstrings
+* Fix content-type name header
+* Parametries 'timeout' and 'retries' in client
+* Small fixes in functional tests
+* More strict flake8 linting
+* Introduce functional tests
+* Fix size parameter in Volume.resize method
+* Update top-level imports
+* Update changelog
 * Fix typo in unit tests
 * Added unit tests for create/one_by_name Volume methods
 * Added unit tests for export/unexport Volume methods
