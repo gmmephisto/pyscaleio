@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+0.1.0
+-----
+
+* Bump version
+* Update changelog
 * Added copr build target in Makefile
 * Added MANIFEST.in
 * Added README
