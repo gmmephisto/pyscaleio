@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+* Rename 'perform_actions_on' client method
+* Inject ScaleIO client into model methods
+* Added basic Volume snapshotting operations
+* Fixed README and added installation methods
+* Rename 'SDC' resource class to 'Sdc'
+* Added functional tests for StoragePools
+* Added create/find operations on StoragePools
+
 0.1.0
 -----
 
