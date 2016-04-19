@@ -29,6 +29,24 @@ Features
 - HATEOAS links processing
 
 
+Installation
+------------
+
+Install via **pip**:
+
+.. code-block:: console
+
+   $ pip install pyscaleio
+
+
+Install as RPM package using **yum** or **dnf** on Fedora/RHEL/CentOS:
+
+.. code-block:: console
+
+   $ dnf copr enable miushanov/pyscaleio
+   $ dnf install python-scaleio
+
+
 Usage
 -----
 
@@ -57,13 +75,13 @@ Usage
 
       # and access some volume attributes
       assert volume.name == "test_volume"
-      assert volume.size == 8 * constants.GIGABYTES
+      assert volume.size == 8 * constants.GIGABYTE
 
       # or, resize it to new size
       volume.resize(16)
 
       volume.update()  # updates model data
-      assert volume.size == 16 * constants.GIGABYTES
+      assert volume.size == 16 * constants.GIGABYTE
 
 * Create or delete resources:
 
@@ -72,7 +90,7 @@ Usage
       # create new volume in storage pool
       volume = pyscaleio.Volume.create(16, "storage_pool_id", "new_volume")
       assert volume.name == "new_volume"
-      assert volume.size == 16 * constants.GIGABYTES
+      assert volume.size == 16 * constants.GIGABYTE
 
       # delete volume
       volume = pyscaleio.Volume.one_by_name("test_volume")
