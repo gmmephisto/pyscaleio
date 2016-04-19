@@ -16,14 +16,14 @@
 %define  pkgname pyscaleio
 
 Name:    python-scaleio
-Version: 0.0.1
+Version: 0.1.1
 Release: 1%{?dist}
 Summary: ScaleIO API client
 
 Group:   Development/Tools
-License: MIT
-URL:     http://github.com/gmmephisto/pyscaleio
-Source:  %pkgname-%version.tar.gz
+License: GPLv3
+URL:     https://github.com/gmmephisto/pyscaleio
+Source:  https://pypi.python.org/packages/source/p/%pkgname/%pkgname-%version.tar.gz
 
 BuildRequires: python2-devel
 BuildRequires: python-setuptools
@@ -44,7 +44,7 @@ Requires: python-inflection
 Requires: python-six
 
 %description
-CROC Cloud Platform - ScaleIO API client
+Python library that provides convenient way to interact with ScaleIO REST API.
 
 
 %if %{with python3}
@@ -57,7 +57,7 @@ Requires: python3-inflection
 Requires: python3-six
 
 %description -n python3-scaleio
-CROC Cloud Platform - ScaleIO API client
+Python library that provides convenient way to interact with ScaleIO REST API.
 %endif  # with python3
 
 
@@ -85,14 +85,14 @@ PBR_VERSION=%version %{__python3} setup.py install --skip-build --root "%buildro
 %defattr(-,root,root,-)
 %{python2_sitelib}/pyscaleio
 %{python2_sitelib}/pyscaleio-%{version}-*.egg-info
-%doc ChangeLog
+%doc ChangeLog README.rst
 
 %if %{with python3}
 %files -n python3-scaleio
 %defattr(-,root,root,-)
 %{python3_sitelib}/pyscaleio
 %{python3_sitelib}/pyscaleio-%{version}-*.egg-info
-%doc ChangeLog
+%doc ChangeLog README.rst
 %endif  # with python3
 
 
@@ -101,5 +101,9 @@ PBR_VERSION=%version %{__python3} setup.py install --skip-build --root "%buildro
 
 
 %changelog
+* Tue Apr 19 2016 Mikhail Ushanov <gm.mephisto@gmail.com> - 0.1.1-1
+- New version.
+- Update spec.
+
 * Tue Apr 12 2016 Mikhail Ushanov <gm.mephisto@gmail.com> - 0.0.1-1
 - Initial build.
