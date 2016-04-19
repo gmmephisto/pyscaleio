@@ -140,33 +140,6 @@ def test_custom_model_scheme(client, modelklass, scheme, data):
         assert result._DictScheme__scheme == full_scheme
 
 
-def test_model_get_client(client, modelklass):
-
-    with mock.patch("pyscaleio.models.BaseResource.__scheme__", {}):
-        klass = modelklass("Test", (BaseResource,), {"__scheme__": {}})
-
-        assert klass._get_client() == pyscaleio.get_client()
-        assert klass(instance={})._get_client() == pyscaleio.get_client()
-
-        second_client = ScaleIOClient.from_args("test_host", "admin", "passwd")
-        assert klass._get_client(client=second_client) == second_client
-        assert klass(instance={})._get_client(client=second_client) == second_client
-
-        assert klass._get_client(host="localhost") == pyscaleio.get_client()
-
-
-def test_model_get_client_negative(client, modelklass):
-
-    with mock.patch("pyscaleio.models.BaseResource.__scheme__", {}):
-        klass = modelklass("Test", (BaseResource,), {"__scheme__": {}})
-
-        with pytest.raises(exceptions.ScaleIONotBothParameters):
-            klass._get_client(client="test", host="test")
-
-        with pytest.raises(exceptions.ScaleIOInvalidClient):
-            klass._get_client(client="test")
-
-
 def test_model_initialize(client, modelklass):
 
     with mock.patch("pyscaleio.models.BaseResource.__scheme__", {}):

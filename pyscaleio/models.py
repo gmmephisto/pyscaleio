@@ -44,24 +44,6 @@ class BaseResource(Mapping):
     name based on name of resource class.
     """
 
-    @staticmethod
-    def _get_client(**kwargs):
-        """Returns ScaleIOClient instance by specified kwargs.
-
-        Attention: for internal use only!
-        """
-
-        host, client = kwargs.get("host"), kwargs.get("client")
-        if host and client:
-            raise exceptions.ScaleIONotBothParameters("host", "client")
-
-        if client:
-            if not isinstance(client, pyscaleio.ScaleIOClient):
-                raise exceptions.ScaleIOInvalidClient()
-            return client
-        else:
-            return pyscaleio.get_client(host)
-
     @classmethod
     def _get_name(cls):
         """Returns resource name.
@@ -102,8 +84,9 @@ class BaseResource(Mapping):
 
         return cls(instance_id, **kwargs)
 
+    @pyscaleio.inject
     @classmethod
-    def all(cls, instance_ids=None, **kwargs):
+    def all(cls, client, instance_ids=None, **kwargs):
         """Returns list of resource instances.
 
         :param instance_ids: list of instance ids (optional)
@@ -111,7 +94,6 @@ class BaseResource(Mapping):
         :returns: list of resource instances
         """
 
-        client = cls._get_client(**kwargs)
         if not instance_ids:
             instances = client.get_instances_of(cls._get_name())
         else:
@@ -124,8 +106,9 @@ class BaseResource(Mapping):
             for instance in instances
         ]
 
-    def __init__(self, instance_id=None, instance=None, host=None, client=None):
-        self._client = self._get_client(host=host, client=client)
+    @pyscaleio.inject
+    def __init__(self, client, instance_id=None, instance=None):
+        self._client = client
         self._scheme = {}
 
         if instance_id and instance:
@@ -192,14 +175,14 @@ class EditableResource(BaseResource):
 class MutableResource(EditableResource):
     """Resource model that can be created/deleted."""
 
+    @pyscaleio.inject
     @classmethod
-    def create(cls, instance, **kwargs):
+    def create(cls, client, instance, **kwargs):
         """Created instance of resource.
 
         :param instance: instance payload
         """
 
-        client = cls._get_client(**kwargs)
         instance_id = client.create_instance_of(cls._get_name(), instance)
 
         return cls(instance_id, **kwargs)
@@ -259,8 +242,9 @@ class StoragePool(MutableResource):
         ("protectionDomainId", "ProtectionDomain")
     ])
 
+    @pyscaleio.inject
     @classmethod
-    def one_by_name(cls, name, domain_name, **kwargs):
+    def one_by_name(cls, client, name, domain_name):
         """Returns StoragePool instance by name and protection domain name.
 
         :param name: storage pool name
@@ -269,7 +253,6 @@ class StoragePool(MutableResource):
         :rtype: pyscaleio.StoragePool
         """
 
-        client = cls._get_client(**kwargs)
         data = {
             "name": name,
             "protectionDomainName": domain_name
@@ -279,8 +262,9 @@ class StoragePool(MutableResource):
 
         return cls(pool_id, client=client)
 
+    @pyscaleio.inject
     @classmethod
-    def create(cls, domain, checksum=False, rfcache=False, name=None, **kwargs):
+    def create(cls, client, domain, checksum=False, rfcache=False, name=None, **kwargs):
         """Creates StoragePool instance.
 
         :param domain: protection domain id (required)
@@ -352,11 +336,11 @@ class Sdc(MutableResource):
         ("systemId", "System")
     ])
 
+    @pyscaleio.inject
     @classmethod
-    def all_approved(cls, **kwargs):
+    def all_approved(cls, client, **kwargs):
         """Returns list of all approved SDCs."""
 
-        client = cls._get_client(**kwargs)
         instances = client.perform_actions_on(
             cls._get_name(), "queryAllApprovedSdc", {})
 
@@ -364,8 +348,9 @@ class Sdc(MutableResource):
             for instance in instances
         ]
 
+    @pyscaleio.inject
     @classmethod
-    def one_by_ip(cls, ip_address, **kwargs):
+    def one_by_ip(cls, client, ip_address, **kwargs):
         """Returns SDC instance by specified IP address.
 
         :param ip_address: IP address of SDC
@@ -419,8 +404,9 @@ class Volume(MutableResource):
         ("vtreeId", "VTree"),
     ])
 
+    @pyscaleio.inject
     @classmethod
-    def one_by_name(cls, name, **kwargs):
+    def one_by_name(cls, client, name, **kwargs):
         """Returns volume instance by name.
 
         :param name: volume name (required)
@@ -428,7 +414,6 @@ class Volume(MutableResource):
         :rtype: pyscaleio.Volume
         """
 
-        client = cls._get_client(**kwargs)
         volume_id = client.perform_actions_on(
             cls._get_name(), "queryIdByKey", {"name": name})
 

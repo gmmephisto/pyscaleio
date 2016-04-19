@@ -4,12 +4,13 @@ import json
 import psys
 import requests
 
+from functools import wraps
 from six.moves.urllib.parse import urljoin
 
+import pyscaleio
 from pyscaleio import constants
 from pyscaleio import exceptions
 from pyscaleio import utils
-from pyscaleio.models import System
 
 
 requests.packages.urllib3.disable_warnings()
@@ -182,6 +183,8 @@ class ScaleIOClient(object):
 
     @property
     def system(self):
+        from pyscaleio.models import System
+
         if not self._system:
             self._system = System.all(client=self)[0]
         return self._system
@@ -235,3 +238,35 @@ class ScaleIOClient(object):
         return self._session.post("types/{type}/instances/action/{action}".format(
             type=resource, action=action), data=psys.u(json.dumps(action_data))
         )
+
+
+def _get_client(kwargs):
+    """
+    Returns ScaleIOClient instance by specified kwargs.
+    Attention: for internal use only!
+    """
+
+    host, client = kwargs.pop("host", None), kwargs.pop("client", None)
+    if host and client:
+        raise exceptions.ScaleIONotBothParameters("host", "client")
+
+    if client:
+        if not isinstance(client, ScaleIOClient):
+            raise exceptions.ScaleIOInvalidClient()
+        return client
+    else:
+        return pyscaleio.get_client(host)
+
+
+@utils.decorator
+def inject(function):
+    """
+    Decorates and injects ScaleIOClient instance
+    into decorated method or function.
+    """
+
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        client = _get_client(kwargs)
+        return function(client, *args, **kwargs)
+    return wrapper

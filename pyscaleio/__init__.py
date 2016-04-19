@@ -1,4 +1,4 @@
-from .client import ScaleIOSession, ScaleIOClient
+from .client import ScaleIOSession, ScaleIOClient, inject  # noqa
 from .manager import ScaleIOClientsManager
 from .models import (
     System, ProtectionDomain, StoragePool,

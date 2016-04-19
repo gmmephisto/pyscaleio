@@ -403,3 +403,23 @@ def test_client_manager_register_negative(manager):
     manager.register(client)
     with pytest.raises(exceptions.ScaleIOClientAlreadyRegistered):
         manager.register(client)
+
+
+def test_model_inject_client(manager, mock_client):
+
+    manager.register(mock_client("localhost", "admin", "passwd"))
+
+    assert pyscaleio.client._get_client({}) == pyscaleio.get_client()
+    assert pyscaleio.client._get_client({"host": "localhost"}) == pyscaleio.get_client()
+
+    second_client = mock_client("test_host", "admin", "passwd")
+    assert pyscaleio.client._get_client({"client": second_client}) == second_client
+
+
+def test_model_inject_client_negative():
+
+    with pytest.raises(exceptions.ScaleIONotBothParameters):
+        pyscaleio.client._get_client({"client": "test", "host": "test"})
+
+    with pytest.raises(exceptions.ScaleIOInvalidClient):
+        pyscaleio.client._get_client({"client": "test"})
