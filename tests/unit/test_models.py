@@ -84,7 +84,7 @@ def test_base_model_name(client):
 
 @pytest.mark.parametrize(("name", "result"), [
     ("Volume", "Volume"), ("VTree", "VTree"),
-    ("StoragePool", "StoragePool"), ("SDC", "Sdc"),
+    ("StoragePool", "StoragePool"), ("Sdc", "Sdc"),
 ])
 def test_custom_model_name(client, modelklass, name, result):
 

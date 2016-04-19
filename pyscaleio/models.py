@@ -339,7 +339,7 @@ class VTree(BaseResource):
     ])
 
 
-class SDC(MutableResource):
+class Sdc(MutableResource):
     """SDC resource model."""
 
     __scheme__ = {

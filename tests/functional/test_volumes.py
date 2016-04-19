@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import pytest
 
-from pyscaleio import System, StoragePool, Volume, SDC
+from pyscaleio import System, StoragePool, Volume, Sdc
 from pyscaleio import exceptions
 from pyscaleio import constants
 
@@ -68,16 +68,16 @@ def test_volume_resize(storage_pool):
 def test_volume_export(storage_pool, system):
 
     if system.is_restricted:
-        if not SDC.all_approved():
+        if not Sdc.all_approved():
             pytest.skip("No one approved SDC in restricted mode.")
 
     volume = Volume.create(8, storage_pool["id"], name=_get_test_name(1))
     assert not volume.exports
 
     if system.is_restricted:
-        sdc = SDC.all_approved()[-1]
+        sdc = Sdc.all_approved()[-1]
     else:
-        sdc = SDC.all()[-1]
+        sdc = Sdc.all()[-1]
 
     volume.export(sdc_id=sdc["id"])
     volume.update()
