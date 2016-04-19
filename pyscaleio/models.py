@@ -11,6 +11,7 @@ from six import text_type as str
 import pyscaleio
 from pyscaleio import constants
 from pyscaleio import exceptions
+from pyscaleio import utils
 
 
 class BaseResource(Mapping):
@@ -258,6 +259,70 @@ class StoragePool(MutableResource):
         ("protectionDomainId", "ProtectionDomain")
     ])
 
+    @classmethod
+    def one_by_name(cls, name, domain_name, **kwargs):
+        """Returns StoragePool instance by name and protection domain name.
+
+        :param name: storage pool name
+        :param domain_name: protection domain name
+
+        :rtype: pyscaleio.StoragePool
+        """
+
+        client = cls._get_client(**kwargs)
+        data = {
+            "name": name,
+            "protectionDomainName": domain_name
+        }
+        pool_id = client.perform_actions_on(
+            cls._get_name(), "queryIdByKey", data)
+
+        return cls(pool_id, client=client)
+
+    @classmethod
+    def create(cls, domain, checksum=False, rfcache=False, name=None, **kwargs):
+        """Creates StoragePool instance.
+
+        :param domain: protection domain id (required)
+        :param checksum: enable checksum protection (default is False)
+        :param rfcache: use read-only flash cache (default is False)
+
+        :rtype: pyscaleio.StoragePool
+        """
+
+        pool = {
+            "protectionDomainId": domain,
+            "checksumEnabled": utils.bool_to_str(checksum),
+            "useRfcache": utils.bool_to_str(rfcache),
+        }
+        if name:
+            pool["name"] = name
+
+        return super(StoragePool, cls).create(pool, **kwargs)
+
+    @property
+    def name(self):
+        return self.get("name")
+
+    @property
+    def checksum_enabled(self):
+        return self["checksumEnabled"]
+
+    @property
+    def rfcache_enabled(self):
+        return self["useRfcache"]
+
+    def create_volume(self, size, **kwargs):
+        """Creates Volume instance in current StoragePool.
+
+        :param size: volume size in GB (required)
+
+        :rtype: pyscaleio.Volume
+        """
+
+        kwargs["client"] = self._client
+        return Volume.create(size, self["id"], **kwargs)
+
 
 class VTree(BaseResource):
     """Volume Tree (VTree) resource model."""
@@ -455,7 +520,7 @@ class Volume(MutableResource):
             data["guid"] = sdc_guid
 
         if multiple:
-            data["allowMultipleMappings"] = "TRUE"
+            data["allowMultipleMappings"] = utils.bool_to_str(multiple)
 
         return super(Volume, self).perform("addMappedSdc", data)
 

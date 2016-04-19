@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from collections import MutableMapping, MutableSequence
 from functools import wraps
 
@@ -48,3 +50,22 @@ def drop_none(func):
         else:
             return results
     return wrapper
+
+
+def bool_to_str(value):
+    """
+    Converts bool value to string.
+
+    >>> bool_to_str(True) == "TRUE"
+    True
+    >>> bool_to_str(False) == "FALSE"
+    True
+    >>> bool_to_str("test")
+    Traceback (most recent call last):
+    ...
+    AssertionError: assert isinstance('test', bool)
+    """
+
+    assert isinstance(value, bool)
+
+    return "TRUE" if value is True else "FALSE"

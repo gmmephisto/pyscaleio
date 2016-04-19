@@ -17,7 +17,7 @@ from pyscaleio import exceptions
 
 from pyscaleio import ScaleIOClient
 from pyscaleio.manager import ScaleIOClientsManager
-from pyscaleio.models import BaseResource, Volume, System
+from pyscaleio.models import BaseResource, Volume, StoragePool, System
 
 
 @pytest.fixture
@@ -371,3 +371,61 @@ def test_volume_one_by_name(client):
             assert isinstance(volume, Volume)
             assert volume.name == volume_name
             assert volume["id"] == volume_id
+
+
+@pytest.mark.parametrize(("kw", "result"), [
+    ({"checksum": True}, {"checksumEnabled": "TRUE"}),
+    ({"rfcache": True}, {"useRfcache": "TRUE"}),
+    (
+        {"checksum": True, "rfcache": True},
+        {"checksumEnabled": "TRUE", "useRfcache": "TRUE"}
+    ),
+    ({"name": "test_pool"}, {"name": "test_pool"})
+])
+def test_storage_pool_create(client, kw, result):
+
+    args = ("domain_id",)
+    full_result = {
+        "protectionDomainId": "domain_id",
+        "checksumEnabled": "FALSE",
+        "useRfcache": "FALSE",
+    }
+    full_result.update(result)
+
+    with mock.patch("pyscaleio.models.MutableResource.create") as m:
+        StoragePool.create(*args, **kw)
+        m.assert_called_once_with(full_result)
+
+
+def test_storage_pool_one_by_name(client):
+
+    pool_id = "test_id"
+    pool_name = "test_name"
+    domain_id = "domain_id"
+    domain_name = "domain_name"
+
+    pool_payload = mock_resource_get(StoragePool._get_name(), pool_id, {
+        "id": pool_id,
+        "name": pool_name,
+        "protectionDomainId": domain_id,
+        "checksumEnabled": False,
+        "useRfcache": False,
+    })
+
+    call_args = (StoragePool._get_name(), "queryIdByKey", {
+        "name": pool_name,
+        "protectionDomainName": domain_name,
+    })
+    with mock.patch(
+        "pyscaleio.ScaleIOClient.perform_actions_on",
+        side_effect=[pool_id]
+    ) as m:
+        with httmock.HTTMock(login_payload, pool_payload):
+            pool = StoragePool.one_by_name(pool_name, domain_name)
+        m.assert_called_once_with(*call_args)
+
+        assert isinstance(pool, StoragePool)
+        assert pool.name == pool_name
+        assert pool["id"] == pool_id
+        assert pool.checksum_enabled is False
+        assert pool.rfcache_enabled is False
