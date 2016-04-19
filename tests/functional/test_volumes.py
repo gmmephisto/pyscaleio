@@ -90,3 +90,20 @@ def test_volume_export(storage_pool, system):
     with pytest.raises(exceptions.ScaleIOError):
         volume.export(sdc_id=sdc["id"])
         volume.export(sdc_guid=sdc["guid"])
+
+
+def test_create_volume_snapshot(storage_pool, system):
+
+    volume = Volume.create(8, storage_pool["id"], name=_get_test_name(1))
+    assert volume.size == 8 * constants.GIGABYTE
+
+    snapshot = volume.snapshot(name=_get_test_name("snapshot_1"))
+    assert isinstance(snapshot, Volume)
+
+    assert snapshot.name == _get_test_name("snapshot_1")
+    assert snapshot.type == constants.VOLUME_TYPE_SNAPSHOT
+    assert snapshot["ancestorVolumeId"] == volume["id"]
+
+    snapshot.delete()
+    with pytest.raises(exceptions.ScaleIOError):
+        snapshot.update()

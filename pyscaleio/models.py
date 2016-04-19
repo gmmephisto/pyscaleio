@@ -410,11 +410,11 @@ class Volume(MutableResource):
         "useRmcache": Bool(),
         "sizeInKb": Integer(),
         "storagePoolId": String(),
-        "volumeType": String(
-            choices=constants.VOLUME_TYPES
-        ),
+        "volumeType": String(choices=constants.VOLUME_TYPES),
+        "ancestorVolumeId": String(optional=True),
     }
     __parents__ = frozenset([
+        ("ancestorVolumeId", "Volume"),
         ("storagePoolId", "StoragePool"),
         ("vtreeId", "VTree"),
     ])
@@ -501,6 +501,21 @@ class Volume(MutableResource):
         """
 
         return super(Volume, self).perform("setVolumeSize", {"sizeInGB": str(size)})
+
+    def snapshot(self, name=None):
+        """Creates snapshot of current volume.
+
+        :param name: snapshot name
+        """
+
+        snapshot = {"volumeId": self["id"]}
+        if name:
+            snapshot["snapshotName"] = name
+
+        result = self._client.system.perform(
+            "snapshotVolumes", {"snapshotDefs": [snapshot]})
+
+        return Volume(result["volumeIdList"][0])
 
     def export(self, sdc_id=None, sdc_guid=None, multiple=False):
         """Exports volume to specified SDC.

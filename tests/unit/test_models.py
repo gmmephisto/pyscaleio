@@ -329,6 +329,48 @@ def test_volume_unexport_negative(client, method):
 
 
 @pytest.mark.parametrize(("kw", "result"), [
+    ({}, {}), ({"name": "test_snapshot"}, {"snapshotName": "test_snapshot"})
+])
+def test_volume_snapshot(client, kw, result):
+    volume_data = {
+        "id": "base_volume",
+        "links": [],
+        "volumeType": constants.VOLUME_TYPE_THIN,
+        "useRmcache": False,
+        "sizeInKb": 1048576,
+        "storagePoolId": "pool_id"
+    }
+    volume = Volume(instance=volume_data)
+
+    snapshot_data = volume_data.copy()
+    snapshot_data.update({
+        "id": "volume_snapshot",
+        "volumeType": constants.VOLUME_TYPE_SNAPSHOT,
+        "ancestorVolume": "base_volume",
+    })
+    snapshot_payload = mock_resource_get(Volume._get_name(),
+        "volume_snapshot", snapshot_data)
+
+    system_payload = mock_resources_get(System._get_name(), [{
+        "id": "test", "restrictedSdcModeEnabled": True
+    }])
+    method_data = {
+        "snapshotDefs": [dict({"volumeId": "base_volume"}, **result)]
+    }
+    with httmock.HTTMock(login_payload, system_payload, snapshot_payload):
+        with mock.patch(
+            "pyscaleio.ScaleIOClient.perform_action_on",
+            side_effect=[{"volumeIdList": ["volume_snapshot"]}]
+        ) as m:
+            snapshot = volume.snapshot(**kw)
+            m.assert_called_once_with("System", "test", "snapshotVolumes", method_data)
+
+        assert isinstance(snapshot, Volume)
+        assert snapshot.type == constants.VOLUME_TYPE_SNAPSHOT
+        assert snapshot.get("ancestorVolume") == "base_volume"
+
+
+@pytest.mark.parametrize(("kw", "result"), [
     ({"name": "test"}, {"name": "test"}),
     ({"rmcache": True}, {"useRmcache": True}),
     ({"thin": False}, {"volumeType": constants.VOLUME_TYPE_THICK}),

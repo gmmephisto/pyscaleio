@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 """Common constants."""
 
 KILOBYTE = 1024
@@ -42,9 +44,13 @@ VOLUME_TYPE_THIN = "ThinProvisioned"
 VOLUME_TYPE_THICK = "ThickProvisioned"
 """Volume type with think provisioning."""
 
+VOLUME_TYPE_SNAPSHOT = "Snapshot"
+"""Volume type Snapshot."""
+
 VOLUME_TYPES = [
     VOLUME_TYPE_THIN,
     VOLUME_TYPE_THICK,
+    VOLUME_TYPE_SNAPSHOT,
 ]
 """Valid volume types."""
 
