@@ -99,7 +99,7 @@ class BaseResource(Mapping):
         else:
             if isinstance(instance_ids, basestring):
                 instance_ids = (instance_ids,)
-            instances = client.perform_actions_on(
+            instances = client.perform_action_on_type(
                 cls._get_name(), "queryBySelectedIds", {"ids": instance_ids})
 
         return [cls(instance=instance, client=client)
@@ -257,7 +257,7 @@ class StoragePool(MutableResource):
             "name": name,
             "protectionDomainName": domain_name
         }
-        pool_id = client.perform_actions_on(
+        pool_id = client.perform_action_on_type(
             cls._get_name(), "queryIdByKey", data)
 
         return cls(pool_id, client=client)
@@ -341,7 +341,7 @@ class Sdc(MutableResource):
     def all_approved(cls, client, **kwargs):
         """Returns list of all approved SDCs."""
 
-        instances = client.perform_actions_on(
+        instances = client.perform_action_on_type(
             cls._get_name(), "queryAllApprovedSdc", {})
 
         return [cls(instance=instance, client=client)
@@ -359,7 +359,7 @@ class Sdc(MutableResource):
         """
 
         client = cls._get_client(**kwargs)
-        instance = client.perform_actions_on(
+        instance = client.perform_action_on_type(
             cls._get_name(), "queryIdByKey", {"ip": ip_address})
 
         return cls(instance=instance, client=client)
@@ -414,7 +414,7 @@ class Volume(MutableResource):
         :rtype: pyscaleio.Volume
         """
 
-        volume_id = client.perform_actions_on(
+        volume_id = client.perform_action_on_type(
             cls._get_name(), "queryIdByKey", {"name": name})
 
         return cls(volume_id, **kwargs)

@@ -376,7 +376,7 @@ def test_volume_one_by_name(client):
     call_args = (Volume._get_name(), "queryIdByKey", {"name": volume_name})
     with mock.patch("pyscaleio.models.Volume.__scheme__", {}):
         with mock.patch(
-            "pyscaleio.ScaleIOClient.perform_actions_on",
+            "pyscaleio.ScaleIOClient.perform_action_on_type",
             side_effect=[volume_id]
         ) as m:
             with httmock.HTTMock(login_payload, volume_payload):
@@ -432,7 +432,7 @@ def test_storage_pool_one_by_name(client):
         "protectionDomainName": domain_name,
     })
     with mock.patch(
-        "pyscaleio.ScaleIOClient.perform_actions_on",
+        "pyscaleio.ScaleIOClient.perform_action_on_type",
         side_effect=[pool_id]
     ) as m:
         with httmock.HTTMock(login_payload, pool_payload):

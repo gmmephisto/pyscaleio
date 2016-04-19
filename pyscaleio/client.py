@@ -232,8 +232,8 @@ class ScaleIOClient(object):
         )
 
     @utils.drop_none
-    def perform_actions_on(self, resource, action, action_data):
-        """Performs action on all instances of specified resource type."""
+    def perform_action_on_type(self, resource, action, action_data):
+        """Performs action on specified resource type."""
 
         return self._session.post("types/{type}/instances/action/{action}".format(
             type=resource, action=action), data=psys.u(json.dumps(action_data))
