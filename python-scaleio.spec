@@ -16,7 +16,7 @@
 %define  pkgname pyscaleio
 
 Name:    python-scaleio
-Version: 0.1.1
+Version: 0.1.2
 Release: 1%{?dist}
 Summary: ScaleIO API client
 
@@ -38,8 +38,9 @@ BuildRequires: python3-pbr
 
 BuildArch:     noarch
 
-Requires: python-requests
-Requires: python-object-validator python-psys
+Requires: python-requests >= 2.3
+Requires: python-object-validator >= 0.1.4
+Requires: python-psys >= 0.3
 Requires: python-inflection
 Requires: python-six
 
@@ -51,8 +52,9 @@ Python library that provides convenient way to interact with ScaleIO REST API.
 %package -n python3-scaleio
 Summary: ScaleIO API client
 
-Requires: python3-requests
-Requires: python3-object-validator python3-psys
+Requires: python3-requests >= 2.3
+Requires: python3-object-validator >= 0.1.4
+Requires: python3-psys >= 0.3
 Requires: python3-inflection
 Requires: python3-six
 
@@ -101,6 +103,10 @@ PBR_VERSION=%version %{__python3} setup.py install --skip-build --root "%buildro
 
 
 %changelog
+* Wed Apr 20 2016 Mikhail Ushanov <gm.mephisto@gmail.com> - 0.1.2-1
+- New version.
+- Update requires version.
+
 * Tue Apr 19 2016 Mikhail Ushanov <gm.mephisto@gmail.com> - 0.1.1-1
 - New version.
 - Update spec.

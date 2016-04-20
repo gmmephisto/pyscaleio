@@ -12,7 +12,7 @@ __all__ = (
     Volume.__name__
 )
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 get_client = ScaleIOClientsManager().get_client
 add_client = ScaleIOClientsManager().register
