@@ -1,6 +1,20 @@
 CHANGES
 =======
 
+0.1.2
+-----
+
+* Update changelog
+* Bump release and update RPM spec
+* Fix broken method in Sdc model
+* Fix urllib3 disable warnings
+* Update setup.cfg fields
+
+0.1.1
+-----
+
+* Bump release and update RPM spec
+* Update changelog
 * Rename 'perform_actions_on' client method
 * Inject ScaleIO client into model methods
 * Added basic Volume snapshotting operations
