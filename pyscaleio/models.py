@@ -358,11 +358,10 @@ class Sdc(MutableResource):
         :rtype: pyscaleio.SDC
         """
 
-        client = cls._get_client(**kwargs)
-        instance = client.perform_action_on_type(
+        instance_id = client.perform_action_on_type(
             cls._get_name(), "queryIdByKey", {"ip": ip_address})
 
-        return cls(instance=instance, client=client)
+        return cls(instance_id, client=client)
 
     @property
     def name(self):

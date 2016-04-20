@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import json
 import psys
 import six
+import uuid
 
 import mock
 import pytest
@@ -17,7 +18,7 @@ from pyscaleio import exceptions
 
 from pyscaleio import ScaleIOClient
 from pyscaleio.manager import ScaleIOClientsManager
-from pyscaleio.models import BaseResource, Volume, StoragePool, System
+from pyscaleio.models import BaseResource, Volume, Sdc, StoragePool, System
 
 
 @pytest.fixture
@@ -444,3 +445,34 @@ def test_storage_pool_one_by_name(client):
         assert pool["id"] == pool_id
         assert pool.checksum_enabled is False
         assert pool.rfcache_enabled is False
+
+
+def test_sdc_one_by_ip(client):
+
+    sdc_id = "test_id"
+    sdc_ip = "172.20.34.126"
+    sdc_guid = str(uuid.uuid4()).upper()
+
+    sdc_payload = mock_resource_get(Sdc._get_name(), sdc_id, {
+        "id": sdc_id,
+        "name": "test_sdc",
+        "sdcIp": sdc_ip,
+        "sdcGuid": sdc_guid,
+        "sdcApproved": True,
+    })
+
+    call_args = (Sdc._get_name(), "queryIdByKey", {"ip": sdc_ip})
+    with mock.patch(
+        "pyscaleio.ScaleIOClient.perform_action_on_type",
+        side_effect=[sdc_id]
+    ) as m:
+        with httmock.HTTMock(login_payload, sdc_payload):
+            sdc = Sdc.one_by_ip(sdc_ip)
+        m.assert_called_once_with(*call_args)
+
+        assert isinstance(sdc, Sdc)
+        assert sdc["id"] == sdc_id
+        assert sdc.name == "test_sdc"
+        assert sdc.ip == sdc_ip
+        assert sdc.guid == sdc_guid
+        assert sdc.is_approved
