@@ -12,8 +12,12 @@ from pyscaleio import constants
 from pyscaleio import exceptions
 from pyscaleio import utils
 
+try:
+    from requests.packages import urllib3
+except ImportError:
+    import urllib3
 
-requests.packages.urllib3.disable_warnings()
+urllib3.disable_warnings()
 """Disable certificate warnings."""
 
 __api_version__ = 2.0
