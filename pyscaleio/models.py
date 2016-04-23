@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from collections import Mapping
+from collections import Mapping, Sequence
 
 from inflection import camelize, underscore
 from object_validator import validate, ValidationError
@@ -380,17 +380,38 @@ class Sdc(MutableResource):
         return self["sdcApproved"]
 
 
+class ExportsInfo(Sequence):
+    """Information about volume exports."""
+
+    __scheme__ = List(DictScheme({
+        "sdcId": String(),
+        "sdcIp": String(),
+        "limitIops": Integer(),
+        "limitBwInMbps": Integer()
+    }), optional=True)
+
+    def __init__(self, data=None):
+        self._data = data or []
+
+    def __getitem__(self, index):
+        return self._data[index]
+
+    def __len__(self):
+        return len(self._data)
+
+    def __contains__(self, key):
+        if isinstance(key, Sdc):
+            return key["id"] in (e["sdcId"] for e in self._data)
+        else:
+            super(ExportsInfo, self).__contains__(key)
+
+
 class Volume(MutableResource):
     """Volume resource model."""
 
     __scheme__ = {
         "name": String(optional=True),
-        "mappedSdcInfo": List(DictScheme({
-            "sdcId": String(),
-            "sdcIp": String(),
-            "limitIops": Integer(),
-            "limitBwInMbps": Integer()
-        }), optional=True),
+        "mappedSdcInfo": ExportsInfo.__scheme__,
         "useRmcache": Bool(),
         "sizeInKb": Integer(),
         "storagePoolId": String(),
@@ -461,7 +482,7 @@ class Volume(MutableResource):
 
     @property
     def exports(self):
-        return self.get("mappedSdcInfo", [])
+        return ExportsInfo(self.get("mappedSdcInfo"))
 
     @property
     def path(self):

@@ -9,6 +9,7 @@ import mock
 import pytest
 import httmock
 
+from collections import Sequence
 from object_validator import String, Integer, DictScheme
 from six import text_type as str
 
@@ -18,7 +19,8 @@ from pyscaleio import exceptions
 
 from pyscaleio import ScaleIOClient
 from pyscaleio.manager import ScaleIOClientsManager
-from pyscaleio.models import BaseResource, Volume, Sdc, StoragePool, System
+from pyscaleio.models import BaseResource, Sdc, StoragePool, System
+from pyscaleio.models import Volume, ExportsInfo
 
 
 @pytest.fixture
@@ -66,6 +68,19 @@ def mock_resources_get(resource, payload):
     def instances_of_payload(url, request):
         return httmock.response(200, payload, request=request)
     return instances_of_payload
+
+
+def mock_volume(override=None):
+    volume_model = {
+        "id": str(uuid.uuid4()),
+        "sizeInKb": (8 * constants.GIGABYTE) // constants.KILOBYTE,
+        "storagePoolId": str(uuid.uuid4()),
+        "useRmcache": False,
+        "volumeType": constants.VOLUME_TYPE_THICK,
+        "mappedSdcInfo": []
+    }
+    volume_model.update(override or {})
+    return volume_model
 
 
 def test_base_model_name(client):
@@ -234,13 +249,9 @@ def test_model_update(client, modelklass, old_payload, new_payload):
 
 def test_volume_model(client):
 
-    volume_payload = mock_resource_get(Volume._get_name(), "test", {
-        "id": "test",
-        "sizeInKb": (8 * constants.GIGABYTE) // constants.KILOBYTE,
-        "storagePoolId": "test_pool",
-        "useRmcache": False,
-        "volumeType": constants.VOLUME_TYPE_THICK
-    })
+    volume_payload = mock_resource_get(Volume._get_name(), "test",
+        mock_volume({"id": "test"})
+    )
     system_payload = mock_resources_get(System._get_name(), [{
         "id": "system"
     }])
@@ -250,11 +261,47 @@ def test_volume_model(client):
         assert volume.name is None
         assert volume.size == 8 * constants.GIGABYTE
         assert volume.type == constants.VOLUME_TYPE_THICK
-        assert isinstance(volume.exports, list)
+        assert isinstance(volume.exports, Sequence)
         assert not volume.exports
 
         with mock.patch("pyscaleio.models.System.__scheme__", {}):
             assert volume.path == "emc-vol-system-test"
+
+
+def test_volume_model_exports(client):
+
+    volume_exports = [{
+        "sdcId": "sdc01",
+        "sdcIp": "127.0.0.1",
+        "limitIops": 0,
+        "limitBwInMbps": 0
+    }]
+    volume_payload = mock_resource_get(Volume._get_name(), "test",
+        mock_volume({
+            "id": "test",
+            "mappedSdcInfo": volume_exports
+        })
+    )
+    sdc_payloads = [mock_resource_get(Sdc._get_name(), sdc_id, {
+        "id": sdc_id,
+        "sdcIp": sdc_id,
+        "sdcGuid": str(uuid.uuid4()),
+        "sdcApproved": True,
+    }) for sdc_id in ("sdc0{0}".format(i) for i in range(1, 3))]
+
+    with httmock.HTTMock(login_payload, volume_payload):
+        volume = Volume("test")
+
+        assert volume.exports
+        assert isinstance(volume.exports, (Sequence, ExportsInfo))
+
+    with httmock.HTTMock(*sdc_payloads):
+        sdc1 = Sdc("sdc01")
+        sdc2 = Sdc("sdc02")
+
+        assert sdc1 in volume.exports
+        assert sdc2 not in volume.exports
+        assert "some_string" not in volume.exports
 
 
 @pytest.mark.parametrize(("kw", "result"), [
