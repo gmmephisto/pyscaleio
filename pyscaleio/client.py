@@ -8,7 +8,7 @@ from functools import wraps
 from six.moves.urllib.parse import urljoin
 
 import pyscaleio
-from pyscaleio import constants
+from pyscaleio import config
 from pyscaleio import exceptions
 from pyscaleio import utils
 
@@ -34,8 +34,8 @@ class ScaleIOSession(object):
     """Endpoint template."""
 
     def __init__(self, host, user, passwd, is_secure=True,
-                 retries=constants.REQUEST_RETRIES,
-                 timeout=constants.NETWORK_TIMEOUT):
+                 retries=config.REQUEST_RETRIES,
+                 timeout=config.NETWORK_TIMEOUT):
         self.host = host
         self.scheme = "https" if is_secure else "http"
 

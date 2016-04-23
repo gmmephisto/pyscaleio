@@ -1,14 +1,15 @@
 from __future__ import unicode_literals
 
+import os
+from six import text_type as str
 from collections import Mapping, Sequence
 
 from inflection import camelize, underscore
 from object_validator import validate, ValidationError
 from object_validator import DictScheme, List, String, Integer, Bool
 
-from six import text_type as str
-
 import pyscaleio
+from pyscaleio import config
 from pyscaleio import constants
 from pyscaleio import exceptions
 from pyscaleio import utils
@@ -486,10 +487,11 @@ class Volume(MutableResource):
 
     @property
     def path(self):
-        return constants.VOLUME_PATH.format(
+        device_name = config.VOLUME_NAME.format(
             system_id=self._client.system["id"],
             volume_id=self["id"]
         )
+        return os.path.join(config.VOLUME_PREFIX, device_name)
 
     def rename(self, name):
         """Changes volume name.

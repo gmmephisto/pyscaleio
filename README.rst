@@ -95,3 +95,20 @@ Usage
       # delete volume
       volume = pyscaleio.Volume.one_by_name("test_volume")
       volume.delete()
+
+* Tune client and models options:
+
+   .. code-block:: python
+
+      pyscaleio.configure(
+         # retries count for each request
+         request_retries=0,
+         # network timeout for requests
+         network_timeout=30,
+         # name of exported volume (according to udev/rules.d)
+         volume_name="emc-2{system_id}{volume_id}",
+         # prefix of exported volume
+         volume_prefix="/dev/disk/by-id")
+
+      volume = pyscaleio.Volume.one_by_name("test_volume")
+      assert volume.path == "/dev/disk/by-id/emc-27947a0127a79ce60ca29f20900000008"

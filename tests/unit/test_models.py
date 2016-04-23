@@ -265,7 +265,7 @@ def test_volume_model(client):
         assert not volume.exports
 
         with mock.patch("pyscaleio.models.System.__scheme__", {}):
-            assert volume.path == "emc-vol-system-test"
+            assert volume.path == "/dev/disk/by-id/emc-vol-system-test"
 
 
 def test_volume_model_exports(client):

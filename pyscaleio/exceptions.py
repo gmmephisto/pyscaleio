@@ -49,6 +49,12 @@ class ScaleIOValidationError(Error):
             "Resource validation error: {0}", exc)
 
 
+class ScaleIOConfigError(Error):
+    def __init__(self, exc):
+        super(ScaleIOConfigError, self).__init__(
+            "Config validation error: {0}", exc)
+
+
 class ScaleIOInvalidParameters(Error):
     def __init__(self, *args, **kwargs):
         super(ScaleIOInvalidParameters, self).__init__(*args, **kwargs)

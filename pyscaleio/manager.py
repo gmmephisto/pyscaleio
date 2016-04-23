@@ -3,21 +3,11 @@ from __future__ import unicode_literals
 from six import add_metaclass
 
 from pyscaleio import exceptions
+from pyscaleio import utils
 from pyscaleio.client import ScaleIOClient
 
 
-class singleton(type):
-    """Singleton meta-class."""
-
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
-
-
-@add_metaclass(singleton)
+@add_metaclass(utils.singleton)
 class ScaleIOClientsManager(object):
     """ScaleIO Clients manager."""
 

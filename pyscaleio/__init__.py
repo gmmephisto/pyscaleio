@@ -1,4 +1,5 @@
 from .client import ScaleIOSession, ScaleIOClient, inject  # noqa
+from .config import ScaleIOConfig
 from .manager import ScaleIOClientsManager
 from .models import (
     System, ProtectionDomain, StoragePool,
@@ -16,3 +17,4 @@ __version__ = "0.1.2"
 
 get_client = ScaleIOClientsManager().get_client
 add_client = ScaleIOClientsManager().register
+configure = ScaleIOConfig().apply

@@ -4,6 +4,17 @@ from collections import MutableMapping, MutableSequence
 from functools import wraps
 
 
+class singleton(type):
+    """Singleton meta-class."""
+
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
 def _drop_none(mapping):
     """
     Removes all keys that points to None values.
