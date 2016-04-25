@@ -350,6 +350,39 @@ def test_volume_unexport_negative(client, method):
 
 
 @pytest.mark.parametrize(("kw", "result"), [
+    ({"sdc_id": "test", "iops": 1000}, {"sdcId": "test", "iopsLimit": "1000"}),
+    ({"sdc_id": "test", "iops": 0}, {"sdcId": "test", "iopsLimit": "0"}),
+    ({"sdc_guid": "test", "mbps": 2048}, {"guid": "test", "bandwidthLimitInKbps": "2097152"}),
+    ({"sdc_guid": "test", "mbps": 0}, {"guid": "test", "bandwidthLimitInKbps": "0"})
+])
+def test_volume_throttle_positive(client, kw, result):
+
+    with mock.patch("pyscaleio.models.Volume.__scheme__", {}):
+        volume = Volume(instance={"id": "test", "links": []})
+
+    with mock.patch("pyscaleio.ScaleIOClient.perform_action_on") as m:
+        volume.throttle(**kw)
+        m.assert_called_once_with("Volume", "test", "setMappedSdcLimits", result)
+
+
+@pytest.mark.parametrize(("kw", "exception"), [
+    ({"sdc_id": "test"}, exceptions.ScaleIORequiredParameters),
+    ({"sdc_id": "test", "iops": 5}, exceptions.ScaleIOInvalidLimit),
+    ({"sdc_id": "test", "mbps": 1024.5}, exceptions.ScaleIOInvalidLimit),
+    ({"sdc_id": "test", "sdc_guid": "test_guid"}, exceptions.ScaleIONotBothParameters),
+])
+def test_volume_throttle_negative(client, kw, exception):
+
+    with mock.patch("pyscaleio.models.Volume.__scheme__", {}):
+        volume = Volume(instance={"id": "test", "links": []})
+
+    with mock.patch("pyscaleio.ScaleIOClient.perform_action_on") as m:
+        with pytest.raises(exception):
+            volume.throttle(**kw)
+        m.assert_not_called()
+
+
+@pytest.mark.parametrize(("kw", "result"), [
     ({}, {}), ({"name": "test_snapshot"}, {"snapshotName": "test_snapshot"})
 ])
 def test_volume_snapshot(client, kw, result):

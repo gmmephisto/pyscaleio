@@ -64,3 +64,15 @@ class ScaleIONotBothParameters(ScaleIOInvalidParameters):
     def __init__(self, first, second):
         super(ScaleIONotBothParameters, self).__init__(
             "Use either '{0}' or '{1}', not both", first, second)
+
+
+class ScaleIORequiredParameters(ScaleIOInvalidParameters):
+    def __init__(self, *params):
+        super(ScaleIORequiredParameters, self).__init__(
+            "One of the parameter(s) must be specified: {0}", ", ".join(params))
+
+
+class ScaleIOInvalidLimit(ScaleIOInvalidParameters):
+    def __init__(self, limit, message):
+        super(ScaleIOInvalidLimit, self).__init__(
+            "Invalid '{0}' limit: {1}", limit, message)

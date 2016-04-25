@@ -524,6 +524,39 @@ class Volume(MutableResource):
 
         return Volume(result["volumeIdList"][0])
 
+    def throttle(self, sdc_id=None, sdc_guid=None, iops=None, mbps=None):
+        """Throttles I/O on current volume.
+
+        :param iops: I/O operations in seconds (> 10)
+        :param mbps: network bandwidth as megabytes in seconds
+        """
+
+        if sdc_id and sdc_guid:
+            raise exceptions.ScaleIONotBothParameters("sdc_id", "sdc_guid")
+
+        if iops is None and mbps is None:
+            raise exceptions.ScaleIORequiredParameters("iops", "mbps")
+
+        if iops is not None and iops != 0 and iops <= 10:
+            raise exceptions.ScaleIOInvalidLimit("iops", "must be greater than 10.")
+
+        if mbps is not None:
+            mbps = mbps * constants.KILOBYTE
+            if bool(mbps % constants.KILOBYTE):
+                raise exceptions.ScaleIOInvalidLimit("mbps", "must be granular to 1024 KB")
+
+        data = {}
+        if sdc_id:
+            data["sdcId"] = sdc_id
+        if sdc_guid:
+            data["guid"] = sdc_guid
+        if iops is not None:
+            data["iopsLimit"] = str(iops)
+        if mbps is not None:
+            data["bandwidthLimitInKbps"] = str(mbps)
+
+        return super(Volume, self).perform("setMappedSdcLimits", data)
+
     def export(self, sdc_id=None, sdc_guid=None, multiple=False):
         """Exports volume to specified SDC.
 
