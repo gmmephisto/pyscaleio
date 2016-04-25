@@ -57,7 +57,7 @@ def drop_none(func):
         if isinstance(results, MutableSequence):
             return [_drop_none(result) for result in results]
         elif isinstance(results, MutableMapping):
-            return _drop_none(func(*args, **kwargs))
+            return _drop_none(results)
         else:
             return results
     return wrapper
