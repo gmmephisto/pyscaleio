@@ -65,11 +65,9 @@ def test_volume_resize(storage_pool):
     assert volume.size == 16 * constants.GIGABYTE
 
 
+@pytest.mark.skipif("not Sdc.all()")
+@pytest.mark.skipif("System.all()[-1].is_restricted and not Sdc.all_approved()")
 def test_volume_export(storage_pool, system):
-
-    if system.is_restricted:
-        if not Sdc.all_approved():
-            pytest.skip("No one approved SDC in restricted mode.")
 
     volume = Volume.create(8, storage_pool["id"], name=_get_test_name(1))
     assert not volume.exports
@@ -90,6 +88,53 @@ def test_volume_export(storage_pool, system):
     with pytest.raises(exceptions.ScaleIOError):
         volume.export(sdc_id=sdc["id"])
         volume.export(sdc_guid=sdc["guid"])
+
+
+@pytest.mark.skipif("not Sdc.all()")
+@pytest.mark.skipif("System.all()[-1].is_restricted and not Sdc.all_approved()")
+def test_volume_throttle(storage_pool, system):
+
+    volume = Volume.create(8, storage_pool["id"], name=_get_test_name(1))
+    assert not volume.exports
+
+    if system.is_restricted:
+        sdc = Sdc.all_approved()[-1]
+    else:
+        sdc = Sdc.all()[-1]
+
+    volume.export(sdc_id=sdc["id"])
+    volume.update()
+
+    assert volume.exports
+    assert len(volume.exports) == 1
+    assert volume.exports[0]["limitIops"] == 0
+    assert volume.exports[0]["limitBwInMbps"] == 0
+
+    volume.throttle(sdc_id=sdc["id"], iops=1000)
+    volume.update()
+
+    assert volume.exports[0]["limitIops"] == 1000
+    assert volume.exports[0]["limitBwInMbps"] == 0
+
+    volume.throttle(sdc_id=sdc["id"], mbps=2048)
+    volume.update()
+
+    assert volume.exports[0]["limitIops"] == 1000
+    assert volume.exports[0]["limitBwInMbps"] == 2048
+
+    volume.throttle(sdc_id=sdc["id"], iops=2000, mbps=1024)
+    volume.update()
+
+    assert volume.exports[0]["limitIops"] == 2000
+    assert volume.exports[0]["limitBwInMbps"] == 1024
+
+    # FIXME: not working due to request validation error
+    with pytest.raises(exceptions.ScaleIOError):
+        volume.throttle(sdc_id=sdc["id"], mbps=0, iops=0)
+
+    volume.throttle(sdc_id=sdc["id"], mbps=0)
+    volume.update()
+    assert volume.exports[0]["limitBwInMbps"] == 0
 
 
 def test_create_volume_snapshot(storage_pool, system):

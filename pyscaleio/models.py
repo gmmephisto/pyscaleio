@@ -543,7 +543,7 @@ class Volume(MutableResource):
         if mbps is not None:
             mbps = mbps * constants.KILOBYTE
             if bool(mbps % constants.KILOBYTE):
-                raise exceptions.ScaleIOInvalidLimit("mbps", "must be granular to 1024 KB")
+                raise exceptions.ScaleIOInvalidLimit("mbps", "must be granular to 1024 Kbps")
 
         data = {}
         if sdc_id:
