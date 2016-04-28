@@ -1,10 +1,13 @@
 from __future__ import unicode_literals
 
 import json
+import logging
 import psys
 import requests
+import uuid
 
 from functools import wraps
+from six import text_type as str
 from six.moves.urllib.parse import urljoin
 
 import pyscaleio
@@ -22,6 +25,9 @@ urllib3.disable_warnings()
 
 __api_version__ = 2.0
 """ScaleIO API Version."""
+
+log = logging.getLogger(__name__)
+"""Logger instance."""
 
 
 class ScaleIOSession(object):
@@ -68,19 +74,22 @@ class ScaleIOSession(object):
 
         self.login()
 
-    def __error(self, exc):
+    def __error(self, exc, request_uuid):
         """Handle request error."""
 
-        error = self.__response(exc.response)
+        error = self.__response(exc.response, request_uuid)
         raise exceptions.ScaleIOError(error["httpStatusCode"],
                                       error["message"],
                                       error["errorCode"])
 
-    def __response(self, response):
+    def __response(self, response, request_uuid):
         """Handle response object."""
 
+        response_payload = response.text
+
+        log.debug("ScaleIO response (%s): %s", request_uuid, response_payload)
         try:
-            return json.loads(psys.u(response.text))
+            return json.loads(psys.u(response_payload))
         except (ValueError, TypeError):
             raise exceptions.ScaleIOMalformedError()
 
@@ -89,6 +98,10 @@ class ScaleIOSession(object):
 
         url = urljoin(self.endpoint, "login")
         auth = (self.user, self.passwd)
+
+        request_uuid = str(uuid.uuid4())
+        log.debug("ScaleIO login (%s): url=%s, auth=%s, timeout=%s",
+            request_uuid, url, auth, timeout)
 
         response = self.__session.get(
             url=url, auth=auth, allow_redirects=False,
@@ -101,7 +114,7 @@ class ScaleIOSession(object):
             else:
                 raise
 
-        self.token = self.__response(response)
+        self.token = self.__response(response, request_uuid)
         self.__session.auth = (self.user, self.token)
 
     def logout(self, timeout=None):
@@ -125,6 +138,10 @@ class ScaleIOSession(object):
         if not self.token:
             self.login()
 
+        request_uuid = str(uuid.uuid4())
+        log.debug("ScaleIO request (%s): method=%s, url=%s, params=%s, data=%s",
+            request_uuid, method, url, params, data)
+
         response = None
         while retries > 0:
             response = self.__session.request(
@@ -145,13 +162,13 @@ class ScaleIOSession(object):
                     retries -= 1
                     continue
                 else:
-                    self.__error(e)
+                    self.__error(e, request_uuid)
             else:
                 if not response:
                     retries -= 1
                     continue
                 else:
-                    return self.__response(response)
+                    return self.__response(response, request_uuid)
 
     def get(self, path, params=None):
         return self._send_request(method="get",
