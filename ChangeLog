@@ -1,6 +1,18 @@
 CHANGES
 =======
 
+0.1.3
+-----
+
+* Update changelog and bump version
+* Added request/response debug logging to ScaleIO session
+* Fix typo in drop_none decorator
+* Added functional tests for Volume throttle method
+* Added throttle method to Volume model
+* Added config module for tuning various client options
+* Enable python3.5 support and tests
+* Added ExportsInfo wrapper that incapsulates Volume exports
+
 0.1.2
 -----
 
