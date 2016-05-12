@@ -34,7 +34,7 @@ def client(request):
         os.getenv("scaleio_host"),
         os.getenv("scaleio_user"),
         os.getenv("scaleio_passwd"),
-        os.getenv("scaleio_is_secure")
+        bool(int(os.getenv("scaleio_is_secure")))
     )
     pyscaleio.add_client(client)
     request.addfinalizer(ScaleIOClientsManager().deregister)
@@ -74,3 +74,23 @@ def setup_teardown(request):
     cleanup_pools()
     request.addfinalizer(cleanup_volumes)
     request.addfinalizer(cleanup_pools)
+
+
+@pytest.fixture
+def setup_logging(request):
+    """Fixture that setups debug logging."""
+
+    import logging
+
+    logger = logging.getLogger("pyscaleio")
+    logger.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter(
+        "%(asctime)s.%(msecs)03d %(levelname)s: %(message)s",
+        "%Y.%m.%d %H:%M:%S")
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    request.addfinalizer(lambda: logger.removeHandler(handler))

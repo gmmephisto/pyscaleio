@@ -7,9 +7,10 @@ from pyscaleio import exceptions
 from pyscaleio import constants
 
 from . import _get_test_name
-from . import client, setup_teardown
+from . import client, setup_teardown, setup_logging
 assert client
 assert setup_teardown
+assert setup_logging
 
 
 @pytest.fixture
@@ -27,7 +28,7 @@ def test_get_system():
     assert len(System.all()) == 1
 
 
-def test_create_volume(storage_pool):
+def test_create_volume(storage_pool, setup_logging):
 
     volume = Volume.create(4, storage_pool["id"], name=_get_test_name(1))
 
