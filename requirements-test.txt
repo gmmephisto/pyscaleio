@@ -1,4 +1,4 @@
 coverage
 mock
 pytest
--e git+https://github.com/gmmephisto/httmock@pr-master-remember-calls#egg=httmock
+httmock>=1.2.6
