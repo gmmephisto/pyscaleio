@@ -16,22 +16,7 @@ class singleton(type):
 
 
 def _drop_none(mapping):
-    """
-    Removes all keys that points to None values.
-
-    >>> _drop_none({})
-    {}
-    >>> _drop_none({'a': 'A', 'b': 'B'}) == {'a': 'A', 'b': 'B'}
-    True
-    >>> _drop_none({'a': 'A', 'b': None}) == {'a': 'A'}
-    True
-    >>> _drop_none({'a': 'A', 'b': None, 'c': 'C', 'd': None}) == {'a': 'A', 'c': 'C'}
-    True
-    >>> _drop_none(('a', 'b'))
-    Traceback (most recent call last):
-    ...
-    AssertionError: assert isinstance(('a', 'b'), MutableMapping)
-    """
+    """Removes all keys that points to None values."""
 
     assert isinstance(mapping, MutableMapping)
     for key in mapping.copy():
@@ -64,18 +49,7 @@ def drop_none(func):
 
 
 def bool_to_str(value):
-    """
-    Converts bool value to string.
-
-    >>> bool_to_str(True) == "TRUE"
-    True
-    >>> bool_to_str(False) == "FALSE"
-    True
-    >>> bool_to_str("test")
-    Traceback (most recent call last):
-    ...
-    AssertionError: assert isinstance('test', bool)
-    """
+    """Converts bool value to string."""
 
     assert isinstance(value, bool)
 
