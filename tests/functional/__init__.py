@@ -1,12 +1,7 @@
 from __future__ import unicode_literals
 
-import os
-import pytest
-
 from six import text_type as str
 
-import pyscaleio
-from pyscaleio import ScaleIOClient, ScaleIOClientsManager
 from pyscaleio import StoragePool, Volume
 
 
@@ -24,21 +19,6 @@ def _get_test_name(string):
     """Returns test name for resource."""
 
     return TEST_NAME_PREFIX + str(string)
-
-
-@pytest.fixture(scope="module", autouse=True)
-def client(request):
-    """ScaleIO client fixture."""
-
-    client = ScaleIOClient.from_args(
-        os.getenv("scaleio_host"),
-        os.getenv("scaleio_user"),
-        os.getenv("scaleio_passwd"),
-        bool(int(os.getenv("scaleio_is_secure")))
-    )
-    pyscaleio.add_client(client)
-    request.addfinalizer(ScaleIOClientsManager().deregister)
-    return client
 
 
 def cleanup_volumes():
@@ -64,33 +44,3 @@ def cleanup_pools():
         pool.delete()
 
     assert not [p for p in StoragePool.all() if _is_test_name(p)]
-
-
-@pytest.fixture(autouse=True)
-def setup_teardown(request):
-    """Fixture that performs setup/teardown per test."""
-
-    cleanup_volumes()
-    cleanup_pools()
-    request.addfinalizer(cleanup_volumes)
-    request.addfinalizer(cleanup_pools)
-
-
-@pytest.fixture
-def setup_logging(request):
-    """Fixture that setups debug logging."""
-
-    import logging
-
-    logger = logging.getLogger("pyscaleio")
-    logger.setLevel(logging.DEBUG)
-
-    formatter = logging.Formatter(
-        "%(asctime)s.%(msecs)03d %(levelname)s: %(message)s",
-        "%Y.%m.%d %H:%M:%S")
-
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    request.addfinalizer(lambda: logger.removeHandler(handler))

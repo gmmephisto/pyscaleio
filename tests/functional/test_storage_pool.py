@@ -6,9 +6,6 @@ from pyscaleio import ProtectionDomain, StoragePool, Volume
 from pyscaleio import exceptions
 
 from . import _get_test_name
-from . import client, setup_teardown
-assert client
-assert setup_teardown
 
 
 @pytest.fixture
