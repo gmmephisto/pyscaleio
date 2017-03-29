@@ -17,4 +17,5 @@ __version__ = "0.1.3"
 
 get_client = ScaleIOClientsManager().get_client
 add_client = ScaleIOClientsManager().register
+del_client = ScaleIOClientsManager().deregister
 configure = ScaleIOConfig().apply
