@@ -1,6 +1,19 @@
 CHANGES
 =======
 
+0.1.4
+-----
+
+* Update changelog and bump version
+* Added del_client method to pyscaleio module
+* Update requirements.txt
+* Update README
+* Update tox.ini for quotes
+* Move fixtures to conftest module
+* Use upstream 'httmock' for unittests
+* Rewrite negative doctests to pytest
+* Added logging to functional tests
+
 0.1.3
 -----
 

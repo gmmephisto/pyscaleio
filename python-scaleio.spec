@@ -16,7 +16,7 @@
 %define  pkgname pyscaleio
 
 Name:    python-scaleio
-Version: 0.1.3
+Version: 0.1.4
 Release: 1%{?dist}
 Summary: ScaleIO API client
 
@@ -103,6 +103,10 @@ PBR_VERSION=%version %{__python3} setup.py install --skip-build --root "%buildro
 
 
 %changelog
+* Wed Mar 29 2017 Mikhail Ushanov <gm.mephisto@gmail.com> - 0.1.4-1
+- New version.
+- Update requires version.
+
 * Wed Apr 20 2016 Mikhail Ushanov <gm.mephisto@gmail.com> - 0.1.2-1
 - New version.
 - Update requires version.
