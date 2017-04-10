@@ -333,6 +333,8 @@ class Sdc(MutableResource):
         "sdcIp": String(),
         "sdcGuid": String(),
         "sdcApproved": Bool(),
+        "mdmConnectionState": String(
+            choices=constants.SDC_MDM_STATES),
     }
     __parents__ = frozenset([
         ("systemId", "System")
@@ -380,6 +382,10 @@ class Sdc(MutableResource):
     @property
     def is_approved(self):
         return self["sdcApproved"]
+
+    @property
+    def is_connected(self):
+        return self["mdmConnectionState"] == constants.SDC_MDM_STATE_CONNECTED
 
 
 class ExportsInfo(Sequence):

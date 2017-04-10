@@ -67,3 +67,16 @@ VOLUME_REMOVE_MODES = [
     VOLUME_REMOVE_VTREE,
 ]
 """Valid volume remove modes"""
+
+
+SDC_MDM_STATE_CONNECTED = "Connected"
+"""SDC MDM connected state."""
+
+SDC_MDM_STATE_DISCONNECTED = "Disconnected"
+"""SDC MDM disconnected state."""
+
+SDC_MDM_STATES = [
+    SDC_MDM_STATE_CONNECTED,
+    SDC_MDM_STATE_DISCONNECTED,
+]
+"""Valid SDC MDM connection states."""

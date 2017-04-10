@@ -287,6 +287,7 @@ def test_volume_model_exports(client):
         "sdcIp": sdc_id,
         "sdcGuid": str(uuid.uuid4()),
         "sdcApproved": True,
+        "mdmConnectionState": constants.SDC_MDM_STATE_CONNECTED,
     }) for sdc_id in ("sdc0{0}".format(i) for i in range(1, 3))]
 
     with httmock.HTTMock(login_payload, volume_payload):
@@ -539,6 +540,7 @@ def test_sdc_one_by_ip(client):
         "sdcIp": sdc_ip,
         "sdcGuid": sdc_guid,
         "sdcApproved": True,
+        "mdmConnectionState": constants.SDC_MDM_STATE_CONNECTED,
     })
 
     call_args = (Sdc._get_name(), "queryIdByKey", {"ip": sdc_ip})
@@ -556,3 +558,4 @@ def test_sdc_one_by_ip(client):
         assert sdc.ip == sdc_ip
         assert sdc.guid == sdc_guid
         assert sdc.is_approved
+        assert sdc.is_connected
