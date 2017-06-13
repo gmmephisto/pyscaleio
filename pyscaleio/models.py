@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import os
 from six import text_type as str
+from six import string_types
 from collections import Mapping, Sequence
 
 from inflection import camelize, underscore
@@ -98,7 +99,7 @@ class BaseResource(Mapping):
         if not instance_ids:
             instances = client.get_instances_of(cls._get_name())
         else:
-            if isinstance(instance_ids, basestring):
+            if isinstance(instance_ids, string_types):
                 instance_ids = (instance_ids,)
             instances = client.perform_action_on_type(
                 cls._get_name(), "queryBySelectedIds", {"ids": instance_ids})
