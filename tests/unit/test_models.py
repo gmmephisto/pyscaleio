@@ -247,6 +247,67 @@ def test_model_update(client, modelklass, old_payload, new_payload):
         assert volume == new_payload
 
 
+def test_model_one(client, modelklass):
+
+    klass = modelklass("Volume", (BaseResource,), {
+        "__scheme__": {
+            "name": String(optional=True)
+        }
+    })
+    payload = {"id": "test", "name": "test_volume"}
+    volume_payload = mock_resource_get("Volume", "test", payload)
+
+    with httmock.HTTMock(login_payload, volume_payload):
+        volume = klass.one("test")
+        assert volume == payload
+
+
+def test_model_all(client, modelklass):
+
+    klass = modelklass("Volume", (BaseResource,), {
+        "__scheme__": {
+            "name": String(optional=True)
+        }
+    })
+    payload = [{
+        "id": "test{0}".format(i),
+        "name": "test_volume{0}".format(i)
+    } for i in range(1, 2 + 1)]
+    volumes_payload = mock_resources_get("Volume", payload)
+
+    with httmock.HTTMock(login_payload, volumes_payload):
+        volumes = klass.all()
+        assert len(volumes) == 2
+        assert sorted(["test1", "test2"]) == sorted(v["id"] for v in volumes)
+
+
+def test_model_all_by_ids(client, modelklass):
+
+    klass = modelklass("Volume", (BaseResource,), {
+        "__scheme__": {
+            "name": String(optional=True)
+        }
+    })
+    payload = [{
+        "id": "test{0}".format(i),
+        "name": "test_volume{0}".format(i)
+    } for i in range(1, 3 + 1)]
+
+    def mocked_action(name, action, args):
+        return [item for item in payload if item["id"] in args["ids"]]
+
+    with mock.patch(
+        "pyscaleio.ScaleIOClient.perform_action_on_type",
+        side_effect=mocked_action
+    ):
+        volumes = klass.all(instance_ids=["test2", "test3"])
+        assert len(volumes) == 2
+
+        volumes = klass.all(instance_ids="test2")
+        assert len(volumes) == 1
+        assert volumes[0]["id"] == "test2"
+
+
 def test_volume_model(client):
 
     volume_payload = mock_resource_get(Volume._get_name(), "test",
