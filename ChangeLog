@@ -1,11 +1,20 @@
 CHANGES
 =======
 
+0.1.5
+-----
+
+* Update changelog and bump version
+* Added pypi target to Makefile
+* Added unit tests for resource getters
+* Added SDC connection state field
+* Replace basetring with six.string\_types
+
 0.1.4
 -----
 
 * Update changelog and bump version
-* Added del_client method to pyscaleio module
+* Added del\_client method to pyscaleio module
 * Update requirements.txt
 * Update README
 * Update tox.ini for quotes
@@ -19,7 +28,7 @@ CHANGES
 
 * Update changelog and bump version
 * Added request/response debug logging to ScaleIO session
-* Fix typo in drop_none decorator
+* Fix typo in drop\_none decorator
 * Added functional tests for Volume throttle method
 * Added throttle method to Volume model
 * Added config module for tuning various client options
@@ -40,7 +49,7 @@ CHANGES
 
 * Bump release and update RPM spec
 * Update changelog
-* Rename 'perform_actions_on' client method
+* Rename 'perform\_actions\_on' client method
 * Inject ScaleIO client into model methods
 * Added basic Volume snapshotting operations
 * Fixed README and added installation methods
@@ -67,7 +76,7 @@ CHANGES
 * Update top-level imports
 * Update changelog
 * Fix typo in unit tests
-* Added unit tests for create/one_by_name Volume methods
+* Added unit tests for create/one\_by\_name Volume methods
 * Added unit tests for export/unexport Volume methods
 * More code-reusage in unit tests
 * Added unit test for instance creation
