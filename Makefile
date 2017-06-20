@@ -46,6 +46,9 @@ copr: srpm
 	@copr-cli build --nowait miushanov/pyscaleio \
 		srpms/$(PACKAGE)-$(VERSION)-$(RELEASE).src.rpm
 
+pypi:
+	@python setup.py sdist bdist_wheel upload
+
 clean:
 	@rm -rf .coverage .coverage-report .venv/ build/ dist/ \
 			.tox/ *.egg* .eggs/ rpms/ srpms/ *.tar.gz *.rpm
