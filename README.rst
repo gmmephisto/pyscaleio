@@ -10,7 +10,7 @@ pyscaleio
 Python library that provides convenient way to interact with ScaleIO REST API.
 
 - Supported ScaleIO versions: 2.0
-- Supported Python versions: 2.6, 2.7, 3.4, 3.5
+- Supported Python versions: 2.6, 2.7, 3.4, 3.5, 3.6
 
 **Library is under development!**
 
