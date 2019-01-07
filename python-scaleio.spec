@@ -68,18 +68,19 @@ Python library that provides convenient way to interact with ScaleIO REST API.
 
 
 %build
-PBR_VERSION=%version %{__python2} setup.py build
+export PBR_VERSION=%version
+%py2_build
 %if %{with python3}
-PBR_VERSION=%version %{__python3} setup.py build
+%py3_build
 %endif  # with python3
 
 
 %install
 [ "%buildroot" = "/" ] || rm -rf "%buildroot"
-
-PBR_VERSION=%version %{__python2} setup.py install --skip-build --root "%buildroot"
+export PBR_VERSION=%version
+%py2_install
 %if %{with python3}
-PBR_VERSION=%version %{__python3} setup.py install --skip-build --root "%buildroot"
+%py3_install
 %endif  # with python3
 
 
