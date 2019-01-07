@@ -1,4 +1,4 @@
-%if 0%{?fedora} > 12 || 0%{?rhel} > 7
+%if 0%{?fedora} > 12 || 0%{?rhel} >= 7
 %bcond_without python3
 %else
 %bcond_with python3
@@ -30,10 +30,10 @@ BuildRequires: python-setuptools
 BuildRequires: python-six
 BuildRequires: python-pbr
 %if %{with python3}
-BuildRequires: python3-devel
-BuildRequires: python3-setuptools
-BuildRequires: python3-six
-BuildRequires: python3-pbr
+BuildRequires: python%{python3_pkgversion}-devel
+BuildRequires: python%{python3_pkgversion}-setuptools
+BuildRequires: python%{python3_pkgversion}-six
+BuildRequires: python%{python3_pkgversion}-pbr
 %endif  # with python3
 
 BuildArch:     noarch
@@ -49,16 +49,16 @@ Python library that provides convenient way to interact with ScaleIO REST API.
 
 
 %if %{with python3}
-%package -n python3-scaleio
+%package -n python%{python3_pkgversion}-scaleio
 Summary: ScaleIO API client
 
-Requires: python3-requests >= 2.3
-Requires: python3-object-validator >= 0.1.4
-Requires: python3-psys >= 0.3
-Requires: python3-inflection
-Requires: python3-six
+Requires: python%{python3_pkgversion}-requests >= 2.3
+Requires: python%{python3_pkgversion}-object-validator >= 0.1.4
+Requires: python%{python3_pkgversion}-psys >= 0.3
+Requires: python%{python3_pkgversion}-inflection
+Requires: python%{python3_pkgversion}-six
 
-%description -n python3-scaleio
+%description -n python%{python3_pkgversion}-scaleio
 Python library that provides convenient way to interact with ScaleIO REST API.
 %endif  # with python3
 
@@ -90,7 +90,7 @@ PBR_VERSION=%version %{__python3} setup.py install --skip-build --root "%buildro
 %doc ChangeLog README.rst
 
 %if %{with python3}
-%files -n python3-scaleio
+%files -n python%{python3_pkgversion}-scaleio
 %defattr(-,root,root,-)
 %{python3_sitelib}/pyscaleio
 %{python3_sitelib}/pyscaleio-%{version}-*.egg-info
