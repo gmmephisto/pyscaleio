@@ -1,4 +1,4 @@
 [flake8]
-ignore = E124,E128,E731
+ignore = E124,E128,E731,W504
 max-line-length = 100
 exclude = .venv/,build/
