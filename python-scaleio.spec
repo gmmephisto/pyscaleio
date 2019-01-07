@@ -16,7 +16,7 @@
 %define  pkgname pyscaleio
 
 Name:    python-scaleio
-Version: 0.1.5
+Version: 0.1.6
 Release: 1%{?dist}
 Summary: ScaleIO API client
 
@@ -104,6 +104,11 @@ export PBR_VERSION=%version
 
 
 %changelog
+* Tue Jan 08 2019 Mikhail Ushanov <gm.mephisto@gmail.com> - 0.1.6-1
+- New version.
+- Python3.6 support.
+- Build python3 package for epel7
+
 * Tue Jun 20 2017 Mikhail Ushanov <gm.mephisto@gmail.com> - 0.1.5-1
 - New version.
 - Python3 compatibility fixes.

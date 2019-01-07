@@ -1,6 +1,15 @@
 CHANGES
 =======
 
+0.1.6
+-----
+
+* Update changelog and bump version
+* Use python build and install macros
+* Build python3 package for epel7
+* Ignore W504 lint warning
+* Enable python3.6 support
+
 0.1.5
 -----
 
