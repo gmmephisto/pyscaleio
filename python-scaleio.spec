@@ -24,7 +24,7 @@ Python library that provides convenient way to interact with ScaleIO REST API.}
 
 Name:    python-scaleio
 Version: 0.1.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: ScaleIO API client
 
 Group:   Development/Tools
@@ -137,6 +137,9 @@ export PBR_VERSION=%version
 
 
 %changelog
+* Fri Feb 15 2019 Mikhail Ushanov <gm.mephisto@gmail.com> - 0.1.6-2
+- Add RPM package build for python3_other in EPEL
+
 * Tue Jan 08 2019 Mikhail Ushanov <gm.mephisto@gmail.com> - 0.1.6-1
 - New version.
 - Python3.6 support.
