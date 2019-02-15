@@ -7,6 +7,9 @@ pyscaleio
 .. image:: https://coveralls.io/repos/github/gmmephisto/pyscaleio/badge.svg?branch=master
    :target: https://coveralls.io/github/gmmephisto/pyscaleio?branch=master
 
+.. image:: https://copr.fedorainfracloud.org/coprs/miushanov/pyscaleio/package/python-scaleio/status_image/last_build.png
+   :target: https://copr.fedorainfracloud.org/coprs/miushanov/pyscaleio/package/python-scaleio/
+
 Python library that provides convenient way to interact with ScaleIO REST API.
 
 - Supported ScaleIO versions: 2.0
@@ -43,6 +46,7 @@ Install as RPM package using **yum** or **dnf** on Fedora/RHEL/CentOS:
 
 .. code-block:: console
 
+   $ dnf copr enable miushanov/pyaddons
    $ dnf copr enable miushanov/pyscaleio
    $ dnf install python-scaleio
 
