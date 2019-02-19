@@ -20,12 +20,12 @@
 
 %global project_name pyscaleio
 %global project_description %{expand:
-Python library that provides convenient way to interact with ScaleIO REST API.}
+Python library that provides convenient way to interact with ScaleIO/VxFlex REST API.}
 
 Name:    python-scaleio
 Version: 0.1.6
 Release: 2%{?dist}
-Summary: ScaleIO API client
+Summary: ScaleIO/VxFlex API client
 
 Group:   Development/Tools
 License: Apache Software License 2.0

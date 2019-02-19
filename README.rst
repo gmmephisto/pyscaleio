@@ -10,9 +10,9 @@ pyscaleio
 .. image:: https://copr.fedorainfracloud.org/coprs/miushanov/pyscaleio/package/python-scaleio/status_image/last_build.png
    :target: https://copr.fedorainfracloud.org/coprs/miushanov/pyscaleio/package/python-scaleio/
 
-Python library that provides convenient way to interact with ScaleIO REST API.
+Python library that provides convenient way to interact with ScaleIO/VxFlex REST API.
 
-- Supported ScaleIO versions: 2.0
+- Supported ScaleIO/VxFlex versions: 2.0
 - Supported Python versions: 2.6, 2.7, 3.4, 3.5, 3.6
 
 **Library is under development!**
@@ -23,7 +23,7 @@ Features
 
 **Currently supported:**
 
-- Simple API client with base methods according to ScaleIO documentation
+- Simple API client with base methods according to ScaleIO/VxFlex documentation
 - ORM-like models (StoragePool, Volume, etc.)
 - Scheme validation for API responses
 
