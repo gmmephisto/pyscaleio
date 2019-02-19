@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+* Update RPM version and changelog
+* Update develop status in setup.cfg
+* Add VxFlex term to project description
+* Update license information
+* Update README.rst
+* Update changelog and bump release
+* Add RPM package build for python3\_other in EPEL
+
 0.1.6
 -----
 
