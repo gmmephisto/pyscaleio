@@ -23,8 +23,8 @@
 Python library that provides convenient way to interact with ScaleIO/VxFlex REST API.}
 
 Name:    python-scaleio
-Version: 0.1.6
-Release: 2%{?dist}
+Version: 0.1.7
+Release: 1%{?dist}
 Summary: ScaleIO/VxFlex API client
 
 Group:   Development/Tools
@@ -137,6 +137,11 @@ export PBR_VERSION=%version
 
 
 %changelog
+* Tue Feb 19 2019 Mikhail Ushanov <gm.mephisto@gmail.com> - 0.1.7-1
+- New version
+- Update license information
+- Add VxFlex term to project description
+
 * Fri Feb 15 2019 Mikhail Ushanov <gm.mephisto@gmail.com> - 0.1.6-2
 - Add RPM package build for python3_other in EPEL
 
