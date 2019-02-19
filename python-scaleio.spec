@@ -28,7 +28,7 @@ Release: 2%{?dist}
 Summary: ScaleIO API client
 
 Group:   Development/Tools
-License: GPLv3
+License: Apache Software License 2.0
 URL:     https://github.com/gmmephisto/pyscaleio
 Source:  https://pypi.python.org/packages/source/p/%project_name/%project_name-%version.tar.gz
 
