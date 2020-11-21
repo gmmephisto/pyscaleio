@@ -13,7 +13,7 @@ pyscaleio
 Python library that provides convenient way to interact with ScaleIO/VxFlex REST API.
 
 - Supported ScaleIO/VxFlex versions: 2.0
-- Supported Python versions: 2.6, 2.7, 3.4, 3.5, 3.6
+- Supported Python versions: 2.6, 2.7, 3.6 - 3.9
 
 **Library is under development!**
 
